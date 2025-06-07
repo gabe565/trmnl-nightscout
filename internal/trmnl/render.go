@@ -83,39 +83,22 @@ func init() {
 }
 
 func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
+	// Create regular image layer
 	img := image.NewRGBA(image.Rect(0, 0, Width, Height))
-	draw.Draw(img, img.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
 
-	d := dither.NewDitherer([]color.Color{color.Black, color.White})
-	d.Matrix = dither.FloydSteinberg
-	d.Serpentine = true
-
+	// Draw regular lines
 	dc := gg.NewContextForRGBA(img)
-
-	dc.SetColor(color.Gray{Y: 0xF2})
-	dc.DrawRoundedRectangle(25, 30, 10, 150, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(430, 30, 10, 70, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(620, 30, 10, 70, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(430, 125, 10, 70, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(620, 125, 10, 70, 5)
-	dc.Fill()
-
-	d.Dither(img)
-
-	dc.SetColor(color.Black)
 	dc.SetDash(2, 4)
 	dc.DrawLine(430, 113, 759, 113)
 	dc.Stroke()
 
+	// Draw text
 	drawer := &font.Drawer{
 		Dst: img,
 		Src: image.NewUniform(color.Black),
 	}
 
+	// Last reading
 	drawer.Face = light128
 	drawer.Dot = fixed.P(49, 140)
 	drawer.DrawString(res.Properties.Bgnow.DisplayBg(conf.Units))
@@ -158,7 +141,7 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	drawer.Dot = fixed.P(640, 183)
 	drawer.DrawString("Delta")
 
-	// Graph
+	// Plot
 	p := plot.New()
 	p.BackgroundColor = color.Transparent
 
@@ -174,7 +157,7 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	p.X.Tick.Label.Font.Size = 10.8
 	p.X.Tick.Marker = plot.TickerFunc(Ticks)
 
-	// Render numbers separately to prevent dithering them
+	// Render numbers and axes to non-dithered layer
 	p.X.Color = color.Transparent
 	p.X.Tick.Color = color.Transparent
 	p.Y.Color = color.Transparent
@@ -182,8 +165,10 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 
 	plotW := vg.Length(Width-2*Margin) * vg.Inch / DPI
 	plotH := vg.Length(Height/2) * vg.Inch / DPI
-	labels := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
-	p.Draw(vgdraw.New(labels))
+
+	c := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
+	p.Draw(vgdraw.New(c))
+	draw.Draw(img, img.Bounds().Add(image.Pt(Margin, Height/2-Margin)), c.Image(), image.Point{}, draw.Over)
 
 	p.X.Color = color.Black
 	p.X.Tick.Color = color.Black
@@ -267,14 +252,39 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	p.X.Tick.Label.Color = color.Transparent
 	p.Y.Tick.Label.Color = color.Transparent
 
-	c := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI))
+	// Create dithered layer
+	dimg := image.NewRGBA(image.Rect(0, 0, Width, Height))
+	draw.Draw(dimg, dimg.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
+
+	// Draw dithered lines
+	dc = gg.NewContextForRGBA(dimg)
+	dc.SetColor(color.Gray{Y: 0xF2})
+	dc.DrawRoundedRectangle(25, 30, 10, 150, 5)
+	dc.Fill()
+	dc.DrawRoundedRectangle(430, 30, 10, 70, 5)
+	dc.Fill()
+	dc.DrawRoundedRectangle(620, 30, 10, 70, 5)
+	dc.Fill()
+	dc.DrawRoundedRectangle(430, 125, 10, 70, 5)
+	dc.Fill()
+	dc.DrawRoundedRectangle(620, 125, 10, 70, 5)
+	dc.Fill()
+
+	// Draw dithered plot parts
+	c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI))
 	p.Draw(vgdraw.New(c))
+	draw.Draw(dimg, dimg.Bounds().Add(image.Pt(Margin, Height/2-Margin)), c.Image(), image.Point{}, draw.Src)
 
-	draw.Draw(img, img.Bounds().Add(image.Pt(Margin, Height/2-Margin)), d.Dither(c.Image()), image.Point{}, draw.Src)
-	draw.Draw(img, img.Bounds().Add(image.Pt(Margin, Height/2-Margin)), labels.Image(), image.Point{}, draw.Over)
+	// Dither
+	d := dither.NewDitherer([]color.Color{color.Black, color.White})
+	d.Matrix = dither.FloydSteinberg
+	d.Serpentine = true
+	d.Dither(dimg)
 
+	// Combine layers
 	final := image.NewPaletted(img.Bounds(), color.Palette{color.Black, color.White})
-	draw.Draw(final, final.Bounds(), img, image.Point{}, draw.Src)
+	draw.Draw(final, final.Bounds(), dimg, image.Point{}, draw.Src)
+	draw.Draw(final, final.Bounds(), img, image.Point{}, draw.Over)
 	return final, nil
 }
 
