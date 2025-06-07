@@ -204,16 +204,13 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 		},
 
 		&plotter.Polygon{
-			XYs: []plotter.XYs{
-				{
-					{X: p.X.Min, Y: conf.HighThreshold},
-					{X: p.X.Max, Y: conf.HighThreshold},
-					{X: p.X.Max, Y: p.Y.Max},
-					{X: p.X.Min, Y: p.Y.Max},
-				},
-			},
-			LineStyle: vgdraw.LineStyle{},
-			Color:     color.Gray{Y: 0xFB},
+			XYs: []plotter.XYs{{
+				{X: p.X.Min, Y: conf.HighThreshold},
+				{X: p.X.Max, Y: conf.HighThreshold},
+				{X: p.X.Max, Y: p.Y.Max},
+				{X: p.X.Min, Y: p.Y.Max},
+			}},
+			Color: color.Gray{Y: 0xFB},
 		},
 
 		// Grid
