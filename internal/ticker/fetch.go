@@ -28,11 +28,13 @@ func (t *Ticker) beginFetch(ctx context.Context) {
 
 func (t *Ticker) Fetch() time.Duration {
 	res, err := t.fetch.Do(context.Background())
-	if err != nil && !errors.Is(err, fetch.ErrNotModified) {
-		t.mu.Lock()
-		slog.Error("Failed to fetch", "err", err)
-		t.error = err
-		t.mu.Unlock()
+	if err != nil {
+		if !errors.Is(err, fetch.ErrNotModified) {
+			t.mu.Lock()
+			slog.Error("Failed to fetch", "err", err)
+			t.error = err
+			t.mu.Unlock()
+		}
 		return t.config.FallbackInterval
 	}
 
