@@ -10,6 +10,7 @@ import (
 	"gabe565.com/trmnl-nightscout/assets"
 	"gabe565.com/trmnl-nightscout/internal/config"
 	"gabe565.com/trmnl-nightscout/internal/fetch"
+	"gabe565.com/trmnl-nightscout/internal/imaging"
 	"gabe565.com/utils/must"
 	"git.sr.ht/~sbinet/gg"
 	"github.com/makeworld-the-better-one/dither/v2"
@@ -282,6 +283,17 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	final := image.NewPaletted(img.Bounds(), color.Palette{color.Black, color.White})
 	draw.Draw(final, final.Bounds(), dimg, image.Point{}, draw.Src)
 	draw.Draw(final, final.Bounds(), img, image.Point{}, draw.Over)
+
+	invert := conf.Invert
+	if res.Properties.Bgnow.Last.Mgdl() <= conf.InvertBelow || res.Properties.Bgnow.Last.Mgdl() >= conf.InvertAbove {
+		invert = !invert
+	}
+	if invert {
+		if err := imaging.Invert1Bit(final); err != nil {
+			return nil, err
+		}
+	}
+
 	return final, nil
 }
 

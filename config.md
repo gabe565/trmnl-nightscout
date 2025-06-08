@@ -14,4 +14,7 @@
  - `GRAPH_DURATION` (default: `6h`) - How far back in time the graph should go.
  - `HIGH_THRESHOLD` (default: `200`) - Where to draw the upper line.
  - `LOW_THRESHOLD` (default: `70`) - Where to draw the lower line.
+ - `INVERT` - Render with a black background and a white foreground.
+ - `INVERT_BELOW` (default: `55`) - Invert colors when below this value. (Stacks with the `INVERT` option)
+ - `INVERT_ABOVE` (default: `300`) - Invert colors when above this value. (Stacks with the `INVERT` option)
 

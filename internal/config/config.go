@@ -31,4 +31,10 @@ type Config struct {
 	HighThreshold float64 `env:"HIGH_THRESHOLD" envDefault:"200"`
 	// Where to draw the lower line.
 	LowThreshold float64 `env:"LOW_THRESHOLD"  envDefault:"70"`
+	// Render with a black background and a white foreground.
+	Invert bool `env:"INVERT"`
+	// Invert colors when below this value. (Stacks with the `INVERT` option)
+	InvertBelow int `env:"INVERT_BELOW"   envDefault:"55"`
+	// Invert colors when above this value. (Stacks with the `INVERT` option)
+	InvertAbove int `env:"INVERT_ABOVE"   envDefault:"300"`
 }
