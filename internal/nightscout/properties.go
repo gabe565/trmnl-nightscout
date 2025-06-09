@@ -1,6 +1,8 @@
 package nightscout
 
 import (
+	"time"
+
 	"gabe565.com/trmnl-nightscout/internal/config"
 )
 
@@ -21,4 +23,15 @@ func (p Properties) String(conf *config.Config) string {
 		result += " [" + p.Bgnow.Mills.Relative(true) + "]"
 	}
 	return result
+}
+
+func (p Properties) GetNextRead() time.Time {
+	if len(p.Buckets) == 0 {
+		return time.Time{}
+	}
+
+	bucket := p.Buckets[0]
+	lastDiff := bucket.ToMills.Sub(bucket.FromMills.Time)
+	nextRead := p.Bgnow.Mills.Add(lastDiff)
+	return nextRead
 }

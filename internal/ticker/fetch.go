@@ -42,13 +42,6 @@ func (t *Ticker) Fetch() time.Duration {
 	t.last = res
 	t.mu.Unlock()
 
-	if len(res.Properties.Buckets) != 0 {
-		bucket := res.Properties.Buckets[0]
-		lastDiff := bucket.ToMills.Sub(bucket.FromMills.Time)
-		nextRead := res.Properties.Bgnow.Mills.Add(lastDiff + t.config.FetchDelay)
-		if until := time.Until(nextRead); until > 0 {
-			return until
-		}
-	}
-	return t.config.FallbackInterval
+	nextRead := time.Until(res.Properties.GetNextRead()) + t.config.FetchDelay
+	return max(nextRead, t.config.FallbackInterval)
 }

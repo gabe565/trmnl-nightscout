@@ -112,17 +112,20 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 		u.RawQuery = q.Encode()
 	}
 
+	refreshRate := time.Until(last.Properties.GetNextRead()) + s.conf.FetchDelay
+	refreshRate = max(refreshRate, 60*time.Second)
+
 	buf := bytes.NewBuffer(make([]byte, 0, 256))
 	if err := json.NewEncoder(buf).Encode(trmnl.Redirect{
 		Filename:    "nightscout-" + stamp.Format(time.RFC3339),
 		URL:         u.String(),
-		RefreshRate: time.Minute,
+		RefreshRate: refreshRate,
 	}); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	http.ServeContent(w, r, "image.json", stamp, strings.NewReader(buf.String()))
+	http.ServeContent(w, r, "image.json", time.Time{}, strings.NewReader(buf.String()))
 }
 
 func (s *Server) image(w http.ResponseWriter, r *http.Request) {
