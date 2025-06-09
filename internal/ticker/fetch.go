@@ -40,6 +40,7 @@ func (t *Ticker) Fetch() time.Duration {
 
 	t.mu.Lock()
 	t.last = res
+	t.error = nil
 	t.mu.Unlock()
 
 	nextRead := time.Until(res.Properties.GetNextRead()) + t.config.FetchDelay
