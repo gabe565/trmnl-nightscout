@@ -228,18 +228,40 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	p.Y.Tick.Color = color.Black
 
 	p.Add(
-		// Low threshold
-		&plotter.Line{
-			XYs: plotter.XYs{
-				{X: p.X.Min, Y: conf.LowThreshold},
+		// High threshold background
+		&plotter.Polygon{
+			XYs: []plotter.XYs{{
+				{X: p.X.Min, Y: conf.HighThreshold},
+				{X: p.X.Max, Y: conf.HighThreshold},
+				{X: p.X.Max, Y: p.Y.Max},
+				{X: p.X.Min, Y: p.Y.Max},
+			}},
+			Color: color.Gray{Y: conf.HighThresholdColor},
+		},
+
+		// Low threshold background
+		&plotter.Polygon{
+			XYs: []plotter.XYs{{
+				{X: p.X.Min, Y: p.Y.Min},
+				{X: p.X.Max, Y: p.Y.Min},
 				{X: p.X.Max, Y: conf.LowThreshold},
-			},
-			LineStyle: vgdraw.LineStyle{
+				{X: p.X.Min, Y: conf.LowThreshold},
+			}},
+			Color: color.Gray{Y: conf.LowThresholdColor},
+		},
+
+		// Grid
+		&plotter.Grid{
+			Vertical: vgdraw.LineStyle{
 				Color:  color.Black,
 				Width:  1,
-				Dashes: []vg.Length{4, 2},
+				Dashes: []vg.Length{1, 5},
 			},
-			FillColor: color.Gray{Y: conf.LowThresholdColor},
+			Horizontal: vgdraw.LineStyle{
+				Color:  color.Black,
+				Width:  1,
+				Dashes: []vg.Length{1, 5},
+			},
 		},
 
 		// High threshold
@@ -255,27 +277,16 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 			},
 		},
 
-		&plotter.Polygon{
-			XYs: []plotter.XYs{{
-				{X: p.X.Min, Y: conf.HighThreshold},
-				{X: p.X.Max, Y: conf.HighThreshold},
-				{X: p.X.Max, Y: p.Y.Max},
-				{X: p.X.Min, Y: p.Y.Max},
-			}},
-			Color: color.Gray{Y: conf.HighThresholdColor},
-		},
-
-		// Grid
-		&plotter.Grid{
-			Vertical: vgdraw.LineStyle{
-				Color:  color.Black,
-				Width:  1,
-				Dashes: []vg.Length{1, 5},
+		// Low threshold
+		&plotter.Line{
+			XYs: plotter.XYs{
+				{X: p.X.Min, Y: conf.LowThreshold},
+				{X: p.X.Max, Y: conf.LowThreshold},
 			},
-			Horizontal: vgdraw.LineStyle{
+			LineStyle: vgdraw.LineStyle{
 				Color:  color.Black,
 				Width:  1,
-				Dashes: []vg.Length{1, 5},
+				Dashes: []vg.Length{4, 2},
 			},
 		},
 	)
