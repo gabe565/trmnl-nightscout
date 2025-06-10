@@ -9,8 +9,8 @@
  - `NIGHTSCOUT_URL` (**required**, non-empty) - Nightscout base URL
  - `NIGHTSCOUT_TOKEN` - Nightscout token. Using an access token is recommended instead of the API secret.
  - `NIGHTSCOUT_UNITS` - Blood sugar unit. (one of: mg/dL, mmol/L)
- - `FETCH_DELAY` (default: `30s`) - Time to wait before the next reading should be ready.\nIn testing, this seems to be about 20s behind, so the default is 30s to be safe.\nYour results may vary.
- - `FALLBACK_INTERVAL` (default: `30s`) - Normally, readings will be fetched when ready (after ~5m).\nThis interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
+ - `FETCH_DELAY` (default: `30s`) - Time to wait before the next reading should be ready. In testing, this seems to be about 20s behind, so the default is 30s to be safe. Your results may vary.
+ - `FALLBACK_INTERVAL` (default: `30s`) - Normally, readings will be fetched when ready (after ~5m). This interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
  - `TIME_FORMAT` (default: `3:04 PM`) - Customize the time format. Use `3:04 PM` for 12-hour time or `15:04` for 24-hour. See [time](https://pkg.go.dev/time) for more details.
  - `GRAPH_DURATION` (default: `6h`) - How far back in time the graph should go.
  - `HIGH_THRESHOLD` (default: `200`) - Where to draw the upper line.

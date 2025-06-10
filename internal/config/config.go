@@ -20,9 +20,9 @@ type Config struct {
 	NightscoutToken string `env:"NIGHTSCOUT_TOKEN"`
 	// Blood sugar unit. (one of: mg/dL, mmol/L)
 	Units Unit `env:"NIGHTSCOUT_UNITS"`
-	// Time to wait before the next reading should be ready.\nIn testing, this seems to be about 20s behind, so the default is 30s to be safe.\nYour results may vary.
+	// Time to wait before the next reading should be ready. In testing, this seems to be about 20s behind, so the default is 30s to be safe. Your results may vary.
 	FetchDelay time.Duration `env:"FETCH_DELAY"             envDefault:"30s"`
-	// Normally, readings will be fetched when ready (after ~5m).\nThis interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
+	// Normally, readings will be fetched when ready (after ~5m). This interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
 	FallbackInterval time.Duration `env:"FALLBACK_INTERVAL"       envDefault:"30s"`
 	// Customize the time format. Use `3:04 PM` for 12-hour time or `15:04` for 24-hour. See [time](https://pkg.go.dev/time) for more details.
 	TimeFormat string `env:"TIME_FORMAT"             envDefault:"3:04 PM"`
