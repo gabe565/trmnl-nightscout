@@ -10,9 +10,16 @@ import (
 )
 
 //go:generate ./convert-icon.sh src/nightscout.svg dist/nightscout.png
+
 var (
 	//go:embed dist/nightscout.png
 	nightscout []byte
+	//go:embed Inter_18pt-Light.ttf
+	InterLight []byte
+	//go:embed Inter_18pt-Regular.ttf
+	InterRegular []byte
+	//go:embed Inter_18pt-SemiBold.ttf
+	InterSemiBold []byte
 )
 
 func Nightscout() image.Image {

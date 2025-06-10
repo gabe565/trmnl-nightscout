@@ -1,7 +1,6 @@
 package trmnl
 
 import (
-	_ "embed"
 	"image"
 	"image/color"
 	"image/draw"
@@ -34,13 +33,6 @@ const (
 
 //nolint:gochecknoglobals
 var (
-	//go:embed Inter_18pt-Light.ttf
-	lightFile []byte
-	//go:embed Inter_18pt-Regular.ttf
-	regularFile []byte
-	//go:embed Inter_18pt-SemiBold.ttf
-	semiBoldFile []byte
-
 	light40    font.Face
 	light128   font.Face
 	regular39  font.Face
@@ -51,12 +43,12 @@ var (
 func init() {
 	plotFont := plotfont.Font{Typeface: "Inter-SemiBold"}
 	plotfont.DefaultCache.Add(plotfont.Collection{
-		{Font: plotFont, Face: must.Must2(opentype.Parse(semiBoldFile))},
+		{Font: plotFont, Face: must.Must2(opentype.Parse(assets.InterSemiBold))},
 	})
 	plot.DefaultFont = plotFont
 	plotter.DefaultFont = plotFont
 
-	light := must.Must2(opentype.Parse(lightFile))
+	light := must.Must2(opentype.Parse(assets.InterLight))
 	light40 = must.Must2(opentype.NewFace(light, &opentype.FaceOptions{
 		Size:    23,
 		DPI:     DPI,
@@ -68,14 +60,14 @@ func init() {
 		Hinting: font.HintingFull,
 	}))
 
-	regular := must.Must2(opentype.Parse(regularFile))
+	regular := must.Must2(opentype.Parse(assets.InterRegular))
 	regular39 = must.Must2(opentype.NewFace(regular, &opentype.FaceOptions{
 		Size:    22.6,
 		DPI:     DPI,
 		Hinting: font.HintingFull,
 	}))
 
-	semiBold := must.Must2(opentype.Parse(semiBoldFile))
+	semiBold := must.Must2(opentype.Parse(assets.InterSemiBold))
 	semiBold20 = must.Must2(opentype.NewFace(semiBold, &opentype.FaceOptions{
 		Size:    11.5,
 		DPI:     DPI,
