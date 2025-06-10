@@ -25,7 +25,7 @@ func (p Properties) String(conf *config.Config) string {
 	return result
 }
 
-func (p Properties) GetNextRead() time.Time {
+func (p Properties) NextTimestamp() time.Time {
 	if len(p.Buckets) == 0 {
 		return time.Time{}
 	}
@@ -34,4 +34,26 @@ func (p Properties) GetNextRead() time.Time {
 	lastDiff := bucket.ToMills.Sub(bucket.FromMills.Time)
 	nextRead := p.Bgnow.Mills.Add(lastDiff)
 	return nextRead
+}
+
+func (p Properties) Interval() time.Duration {
+	const defaultInterval = 5 * time.Minute
+
+	next := p.NextTimestamp()
+	if next.IsZero() {
+		return defaultInterval
+	}
+
+	interval := next.Sub(p.Bgnow.Mills.Time)
+	if interval < 0 {
+		return defaultInterval
+	}
+
+	return interval
+}
+
+func (p Properties) IsRecent(delay time.Duration) bool {
+	interval := p.Interval()
+	diff := time.Since(p.Bgnow.Mills.Add(delay))
+	return diff <= interval
 }

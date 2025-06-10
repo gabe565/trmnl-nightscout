@@ -96,6 +96,11 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 	stamp := last.Properties.Bgnow.Mills.Time
 	if stamp.Before(s.started) {
 		stamp = s.started
+	} else if !last.Properties.IsRecent(s.conf.FetchDelay) {
+		diff := time.Since(stamp)
+		interval := last.Properties.Interval()
+		missed := int(diff / interval)
+		stamp = stamp.Add(time.Duration(missed) * interval)
 	}
 
 	u, err := url.Parse(s.conf.PublicURL)
@@ -112,7 +117,7 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 		u.RawQuery = q.Encode()
 	}
 
-	refreshRate := time.Until(last.Properties.GetNextRead()) + s.conf.FetchDelay
+	refreshRate := time.Until(last.Properties.NextTimestamp()) + s.conf.FetchDelay
 	refreshRate = max(refreshRate, 60*time.Second)
 
 	buf := bytes.NewBuffer(make([]byte, 0, 256))
