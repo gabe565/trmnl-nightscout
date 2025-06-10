@@ -303,16 +303,16 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 }
 
 func Ticks(min, max float64) []plot.Tick { //nolint:revive,predeclared
-	start := time.Unix(int64(min), 0)
-	end := time.Unix(int64(max), 0)
+	start := time.Unix(int64(min), 0).Round(15 * time.Minute)
+	end := time.Unix(int64(max), 0).Round(15 * time.Minute)
 
-	first := start.Add(time.Hour).Truncate(time.Hour)
-	ticks := make([]plot.Tick, 0, int(end.Sub(start).Hours()))
-	for tick := first; !tick.After(end); tick = tick.Add(time.Hour) {
-		ticks = append(ticks, plot.Tick{
-			Value: float64(tick.Unix()),
-			Label: tick.Format("15:00"),
-		})
+	ticks := make([]plot.Tick, 0, int(4*end.Sub(start).Hours()+1))
+	for t := start; !t.After(end); t = t.Add(15 * time.Minute) {
+		tick := plot.Tick{Value: float64(t.Unix())}
+		if t.Minute() == 0 {
+			tick.Label = t.Format("15:00")
+		}
+		ticks = append(ticks, tick)
 	}
 	return ticks
 }
