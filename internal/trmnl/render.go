@@ -239,7 +239,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 				Width:  1,
 				Dashes: []vg.Length{4, 2},
 			},
-			FillColor: color.Gray{Y: 0xF9},
+			FillColor: color.Gray{Y: conf.LowThresholdColor},
 		},
 
 		// High threshold
@@ -262,7 +262,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 				{X: p.X.Max, Y: p.Y.Max},
 				{X: p.X.Min, Y: p.Y.Max},
 			}},
-			Color: color.Gray{Y: 0xFB},
+			Color: color.Gray{Y: conf.HighThresholdColor},
 		},
 
 		// Grid

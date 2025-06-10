@@ -31,8 +31,12 @@ type Config struct {
 	GraphDuration time.Duration `env:"GRAPH_DURATION" envDefault:"6h"`
 	// Where to draw the upper line.
 	HighThreshold float64 `env:"HIGH_THRESHOLD" envDefault:"200"`
+	// Background color above the high threshold line. Value must be between 0-255.
+	HighThresholdColor uint8 `env:"HIGH_THRESHOLD" envDefault:"250"`
 	// Where to draw the lower line.
 	LowThreshold float64 `env:"LOW_THRESHOLD"  envDefault:"70"`
+	// Background color below the low threshold line. Value must be between 0-255.
+	LowThresholdColor uint8 `env:"LOW_THRESHOLD"  envDefault:"247"`
 	// Render with a black background and a white foreground.
 	Invert bool `env:"INVERT"`
 	// Invert colors when below this value. (Stacks with the `INVERT` option)
