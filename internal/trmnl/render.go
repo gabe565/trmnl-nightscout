@@ -207,7 +207,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	p.X.Max = float64(now.Unix())
 	p.X.Padding = 0
 	p.X.Tick.Label.Font.Size = 10.8
-	p.X.Tick.Marker = plot.TickerFunc(Ticks)
+	p.X.Tick.Marker = Ticks(conf)
 
 	// Render numbers and axes to non-dithered layer
 	p.X.Color = color.Transparent
@@ -307,17 +307,44 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	draw.Draw(dimg, dimg.Bounds().Add(image.Pt(Margin, Height/2-Margin)), c.Image(), image.Point{}, draw.Src)
 }
 
-func Ticks(min, max float64) []plot.Tick { //nolint:revive,predeclared
-	start := time.Unix(int64(min), 0).Round(15 * time.Minute)
-	end := time.Unix(int64(max), 0).Round(15 * time.Minute)
-
-	ticks := make([]plot.Tick, 0, int(4*end.Sub(start).Hours()+1))
-	for t := start; !t.After(end); t = t.Add(15 * time.Minute) {
-		tick := plot.Tick{Value: float64(t.Unix())}
-		if t.Minute() == 0 {
-			tick.Label = t.Format("15:00")
-		}
-		ticks = append(ticks, tick)
+func Ticks(conf *config.Config) plot.TickerFunc {
+	interval := 15 * time.Minute
+	if conf.GraphDuration > 8*time.Hour {
+		interval = 30 * time.Minute
 	}
-	return ticks
+
+	var showEvery int
+	switch {
+	case conf.GraphDuration >= 18*time.Hour:
+		showEvery = 3
+	case conf.GraphDuration >= 10*time.Hour:
+		showEvery = 2
+	default:
+		showEvery = 1
+	}
+
+	return func(minVal, maxVal float64) []plot.Tick {
+		start := time.Unix(int64(minVal), 0).Round(interval)
+		end := time.Unix(int64(maxVal), 0).Round(interval)
+
+		ticks := make([]plot.Tick, 0, int(float64(time.Hour/interval)*end.Sub(start).Hours()+1))
+		var hourIdx int
+
+		for t := start; !t.After(end); t = t.Add(interval) {
+			tick := plot.Tick{Value: float64(t.Unix())}
+
+			if t.Minute() == 0 {
+				if hourIdx%showEvery == 0 {
+					tick.Label = t.Format("15:00")
+				} else {
+					tick.Label = " "
+				}
+				hourIdx++
+			}
+
+			ticks = append(ticks, tick)
+		}
+
+		return ticks
+	}
 }
