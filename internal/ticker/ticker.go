@@ -2,6 +2,7 @@ package ticker
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
@@ -41,8 +42,14 @@ func (t *Ticker) Close() {
 	}
 }
 
+var ErrNotLoaded = errors.New("reading not loaded")
+
 func (t *Ticker) Last() (*fetch.Response, error) {
 	t.mu.RLock()
+	last, err := t.last, t.error
 	defer t.mu.RUnlock()
-	return t.last, t.error
+	if last == nil && err == nil {
+		err = ErrNotLoaded
+	}
+	return last, err
 }
