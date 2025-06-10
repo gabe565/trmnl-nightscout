@@ -24,6 +24,8 @@ type Config struct {
 	FetchDelay time.Duration `env:"FETCH_DELAY"             envDefault:"30s"`
 	// Normally, readings will be fetched when ready (after ~5m).\nThis interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
 	FallbackInterval time.Duration `env:"FALLBACK_INTERVAL"       envDefault:"30s"`
+	// Customize the time format. Use `3:04 PM` for 12-hour time or `15:04` for 24-hour. See [time](https://pkg.go.dev/time) for more details.
+	TimeFormat string `env:"TIME_FORMAT"             envDefault:"3:04 PM"`
 
 	// How far back in time the graph should go.
 	GraphDuration time.Duration `env:"GRAPH_DURATION" envDefault:"6h"`

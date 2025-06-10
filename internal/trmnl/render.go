@@ -150,7 +150,7 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	// Updated
 	drawer.Face = regular39
 	drawer.Dot = fixed.P(450, 68)
-	drawer.DrawString(res.Properties.Bgnow.Mills.Format("15:04"))
+	drawer.DrawString(res.Properties.Bgnow.Mills.Format(conf.TimeFormat))
 
 	drawer.Face = semiBold20
 	drawer.Dot = fixed.P(450, 93)
@@ -335,7 +335,7 @@ func Ticks(conf *config.Config) plot.TickerFunc {
 
 			if t.Minute() == 0 {
 				if hourIdx%showEvery == 0 {
-					tick.Label = t.Format("15:00")
+					tick.Label = t.Format(conf.TimeFormat)
 				} else {
 					tick.Label = " "
 				}
