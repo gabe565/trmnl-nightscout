@@ -92,6 +92,7 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	dc.SetDash(2, 4)
 	dc.DrawLine(430, 113, 759, 113)
 	dc.Stroke()
+	dc.SetDash()
 
 	// Draw text
 	drawer := &font.Drawer{
@@ -101,8 +102,20 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 
 	// Last reading
 	drawer.Face = light128
-	drawer.Dot = fixed.P(49, 140)
+	const readingX, readingY = 49, 140
+	drawer.Dot = fixed.P(readingX, readingY)
 	drawer.DrawString(res.Properties.Bgnow.DisplayBg(conf.Units))
+
+	if !res.Properties.IsRecent(conf.FetchDelay) {
+		// Strikethrough
+		dc.SetLineCapButt()
+		dc.SetLineWidth(6)
+		y := readingY - float64(light128.Metrics().XHeight)/64/2
+		dc.DrawLine(readingX, y, float64(drawer.Dot.X)/64, y)
+		dc.Stroke()
+		dc.SetLineCapRound()
+		dc.SetLineWidth(1)
+	}
 
 	drawer.Face = light40
 	drawer.DrawString(" mg/dL")
