@@ -79,6 +79,38 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	// Create regular image layer
 	img := image.NewRGBA(image.Rect(0, 0, Width, Height))
 
+	// Create dithered layer
+	dimg := image.NewRGBA(image.Rect(0, 0, Width, Height))
+	draw.Draw(dimg, dimg.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
+
+	drawText(conf, res, img, dimg)
+	drawPlot(conf, res, img, dimg)
+
+	// Dither
+	d := dither.NewDitherer([]color.Color{color.Black, color.White})
+	d.Matrix = dither.FloydSteinberg
+	d.Serpentine = true
+	d.Dither(dimg)
+
+	// Combine layers
+	final := image.NewPaletted(img.Bounds(), color.Palette{color.Black, color.White})
+	draw.Draw(final, final.Bounds(), dimg, image.Point{}, draw.Src)
+	draw.Draw(final, final.Bounds(), img, image.Point{}, draw.Over)
+
+	invert := conf.Invert
+	if res.Properties.Bgnow.Last.Mgdl() <= conf.InvertBelow || res.Properties.Bgnow.Last.Mgdl() >= conf.InvertAbove {
+		invert = !invert
+	}
+	if invert {
+		if err := imaging.Invert1Bit(final); err != nil {
+			return nil, err
+		}
+	}
+
+	return final, nil
+}
+
+func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	// Draw regular lines
 	dc := gg.NewContextForRGBA(img)
 	dc.SetDash(2, 4)
@@ -86,7 +118,6 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	dc.Stroke()
 	dc.SetDash()
 
-	// Draw text
 	drawer := &font.Drawer{
 		Dst: img,
 		Src: image.NewUniform(color.Black),
@@ -147,7 +178,22 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	drawer.Dot = fixed.P(640, 183)
 	drawer.DrawString("Delta")
 
-	// Plot
+	// Draw dithered lines
+	dc = gg.NewContextForRGBA(dimg)
+	dc.SetColor(color.Gray{Y: 0xF2})
+	dc.DrawRoundedRectangle(25, 30, 10, 150, 5)
+	dc.Fill()
+	dc.DrawRoundedRectangle(430, 30, 10, 70, 5)
+	dc.Fill()
+	dc.DrawRoundedRectangle(620, 30, 10, 70, 5)
+	dc.Fill()
+	dc.DrawRoundedRectangle(430, 125, 10, 70, 5)
+	dc.Fill()
+	dc.DrawRoundedRectangle(620, 125, 10, 70, 5)
+	dc.Fill()
+}
+
+func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	p := plot.New()
 	p.BackgroundColor = color.Transparent
 
@@ -255,51 +301,10 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	p.X.Tick.Label.Color = color.Transparent
 	p.Y.Tick.Label.Color = color.Transparent
 
-	// Create dithered layer
-	dimg := image.NewRGBA(image.Rect(0, 0, Width, Height))
-	draw.Draw(dimg, dimg.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
-
-	// Draw dithered lines
-	dc = gg.NewContextForRGBA(dimg)
-	dc.SetColor(color.Gray{Y: 0xF2})
-	dc.DrawRoundedRectangle(25, 30, 10, 150, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(430, 30, 10, 70, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(620, 30, 10, 70, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(430, 125, 10, 70, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(620, 125, 10, 70, 5)
-	dc.Fill()
-
 	// Draw dithered plot parts
 	c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI))
 	p.Draw(vgdraw.New(c))
 	draw.Draw(dimg, dimg.Bounds().Add(image.Pt(Margin, Height/2-Margin)), c.Image(), image.Point{}, draw.Src)
-
-	// Dither
-	d := dither.NewDitherer([]color.Color{color.Black, color.White})
-	d.Matrix = dither.FloydSteinberg
-	d.Serpentine = true
-	d.Dither(dimg)
-
-	// Combine layers
-	final := image.NewPaletted(img.Bounds(), color.Palette{color.Black, color.White})
-	draw.Draw(final, final.Bounds(), dimg, image.Point{}, draw.Src)
-	draw.Draw(final, final.Bounds(), img, image.Point{}, draw.Over)
-
-	invert := conf.Invert
-	if res.Properties.Bgnow.Last.Mgdl() <= conf.InvertBelow || res.Properties.Bgnow.Last.Mgdl() >= conf.InvertAbove {
-		invert = !invert
-	}
-	if invert {
-		if err := imaging.Invert1Bit(final); err != nil {
-			return nil, err
-		}
-	}
-
-	return final, nil
 }
 
 func Ticks(min, max float64) []plot.Tick { //nolint:revive,predeclared
