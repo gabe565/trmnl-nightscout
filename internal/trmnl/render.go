@@ -129,7 +129,7 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	drawer.Dot = fixed.P(readingX, readingY)
 	drawer.DrawString(res.Properties.Bgnow.DisplayBg(conf.Units))
 
-	if !res.Properties.IsRecent(conf.FetchDelay) {
+	if time.Since(res.Properties.Bgnow.Mills.Time) > 15*time.Minute {
 		// Strikethrough
 		dc.SetLineCapButt()
 		dc.SetLineWidth(6)
