@@ -37,19 +37,11 @@ func (p Properties) NextTimestamp() time.Time {
 }
 
 func (p Properties) Interval() time.Duration {
-	const defaultInterval = 5 * time.Minute
-
-	next := p.NextTimestamp()
-	if next.IsZero() {
-		return defaultInterval
+	mins, err := p.Delta.ElapsedMins.Float64()
+	if err != nil {
+		return 5 * time.Minute
 	}
-
-	interval := next.Sub(p.Bgnow.Mills.Time)
-	if interval < 0 {
-		return defaultInterval
-	}
-
-	return interval
+	return time.Duration(mins * float64(time.Minute)).Round(time.Minute)
 }
 
 func (p Properties) IsRecent(delay time.Duration) bool {
