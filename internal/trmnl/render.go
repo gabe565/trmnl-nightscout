@@ -236,7 +236,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 				{X: p.X.Max, Y: p.Y.Max},
 				{X: p.X.Min, Y: p.Y.Max},
 			}},
-			Color: color.Gray{Y: conf.HighThresholdColor},
+			Color: color.Gray{Y: conf.HighBackgroundShade},
 		},
 
 		// Low threshold background
@@ -247,7 +247,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 				{X: p.X.Max, Y: conf.LowThreshold},
 				{X: p.X.Min, Y: conf.LowThreshold},
 			}},
-			Color: color.Gray{Y: conf.LowThresholdColor},
+			Color: color.Gray{Y: conf.LowBackgroundShade},
 		},
 
 		// Grid

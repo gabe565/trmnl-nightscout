@@ -14,9 +14,9 @@
  - `TIME_FORMAT` (default: `3:04 PM`) - Customize the time format. Use `3:04 PM` for 12-hour time or `15:04` for 24-hour. See [time](https://pkg.go.dev/time) for more details.
  - `GRAPH_DURATION` (default: `6h`) - How far back in time the graph should go.
  - `HIGH_THRESHOLD` (default: `200`) - Where to draw the upper line.
- - `HIGH_THRESHOLD` (default: `250`) - Background color above the high threshold line. Value must be between 0-255.
+ - `HIGH_BACKGROUND_SHADE` (default: `250`) - Background color above the high threshold line. Value must be between 0-255.
  - `LOW_THRESHOLD` (default: `70`) - Where to draw the lower line.
- - `LOW_THRESHOLD` (default: `247`) - Background color below the low threshold line. Value must be between 0-255.
+ - `LOW_BACKGROUND_SHADE` (default: `247`) - Background color below the low threshold line. Value must be between 0-255.
  - `INVERT` - Render with a black background and a white foreground.
  - `INVERT_BELOW` (default: `55`) - Invert colors when below this value. (Stacks with the `INVERT` option)
  - `INVERT_ABOVE` (default: `300`) - Invert colors when above this value. (Stacks with the `INVERT` option)
