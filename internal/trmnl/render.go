@@ -197,8 +197,10 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	p := plot.New()
 	p.BackgroundColor = color.Transparent
 
-	p.Y.Min = 40
-	p.Y.Max = 300
+	const graphMin, graphMax = 40, 300
+
+	p.Y.Min = graphMin
+	p.Y.Max = graphMax
 	p.Y.Padding = 0
 	p.Y.Tick.Label.Font.Size = 10.8
 
@@ -294,9 +296,10 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	// Points
 	points := make(plotter.XYs, 0, len(res.Entries))
 	for _, entry := range res.Entries {
+		reading := max(graphMin, min(graphMax, entry.SGV.Mgdl()))
 		points = append(points, plotter.XY{
 			X: float64(entry.Date.Unix()),
-			Y: float64(entry.SGV.Mgdl()),
+			Y: float64(reading),
 		})
 	}
 
