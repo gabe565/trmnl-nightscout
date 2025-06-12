@@ -96,11 +96,13 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 	stamp := last.Properties.Bgnow.Mills.Time
 	if stamp.Before(s.started) {
 		stamp = s.started
-	} else if !last.Properties.IsRecent(s.conf.FetchDelay) {
-		diff := time.Since(stamp)
+	} else {
+		age := time.Since(stamp)
 		interval := last.Properties.Interval()
-		missed := int(diff / interval)
-		stamp = stamp.Add(time.Duration(missed) * interval)
+		if age > interval+s.conf.FetchDelay {
+			missed := int(age / interval)
+			stamp = stamp.Add(time.Duration(missed) * interval)
+		}
 	}
 
 	u, err := url.Parse(s.conf.PublicURL)
