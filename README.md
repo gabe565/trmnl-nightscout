@@ -10,6 +10,13 @@ TRMNL Nightscout fetches blood sugar data from [Nightscout](https://github.com/n
 - Require an access token to protect your data.
 - Customize the time format and graph parameters.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/preview_dark.png">
+    <img src="assets/preview_light.png" alt="TRMNL Nightscout preview">
+  </picture>
+</p>
+
 ## Usage
 
 TRMNL Nightscout is configured entirely via environment variables. The most important settings are the Nightscout URL and token. See [config.md](config.md) for the full list of options. A minimal example:
