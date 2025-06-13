@@ -1,13 +1,17 @@
 package nightscout
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"gabe565.com/trmnl-nightscout/internal/bg"
+)
 
 type SGV struct {
 	ID         string      `json:"_id"`
 	Device     string      `json:"device"`
 	Direction  string      `json:"direction"`
 	Filtered   json.Number `json:"filtered"`
-	Mgdl       Mgdl        `json:"mgdl"`
+	Mgdl       bg.BG       `json:"mgdl"`
 	Mills      Mills       `json:"mills"`
 	Noise      json.Number `json:"noise"`
 	RSSI       json.Number `json:"rssi"`
@@ -20,7 +24,7 @@ type SGVv1 struct {
 	ID         string      `json:"_id"`
 	Device     string      `json:"device"`
 	Date       Mills       `json:"date"`
-	SGV        Mgdl        `json:"sgv"`
+	SGV        bg.BG       `json:"sgv"`
 	Delta      float64     `json:"delta"`
 	Direction  string      `json:"direction"`
 	Type       string      `json:"type"`

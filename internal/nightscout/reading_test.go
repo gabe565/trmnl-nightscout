@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"gabe565.com/trmnl-nightscout/internal/bg"
 	"gabe565.com/trmnl-nightscout/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,7 +17,7 @@ func TestReading_Arrow(t *testing.T) {
 
 	type fields struct {
 		Mean      json.Number
-		Last      Mgdl
+		Last      bg.BG
 		Mills     Mills
 		Index     json.Number
 		FromMills Mills
@@ -60,7 +61,7 @@ func TestReading_String(t *testing.T) {
 	t.Parallel()
 	type fields struct {
 		Mean      json.Number
-		Last      Mgdl
+		Last      bg.BG
 		Mills     Mills
 		Index     json.Number
 		FromMills Mills
@@ -108,7 +109,7 @@ func TestReading_DisplayBg(t *testing.T) {
 	t.Parallel()
 	type fields struct {
 		Mean      json.Number
-		Last      Mgdl
+		Last      bg.BG
 		Mills     Mills
 		Index     json.Number
 		FromMills Mills
@@ -116,7 +117,7 @@ func TestReading_DisplayBg(t *testing.T) {
 		Sgvs      []SGV
 	}
 	type args struct {
-		units config.Unit
+		units bg.Unit
 	}
 	tests := []struct {
 		name   string
@@ -124,10 +125,10 @@ func TestReading_DisplayBg(t *testing.T) {
 		fields fields
 		want   string
 	}{
-		{"95", args{config.UnitMgdl}, fields{Last: 95}, "95"},
-		{"LOW", args{config.UnitMgdl}, fields{Last: 39}, "LOW"},
-		{"HIGH", args{config.UnitMgdl}, fields{Last: 401}, "HIGH"},
-		{"mmol", args{config.UnitMmol}, fields{Last: 100}, "5.6"},
+		{"95", args{bg.Mgdl}, fields{Last: 95}, "95"},
+		{"LOW", args{bg.Mgdl}, fields{Last: 39}, "LOW"},
+		{"HIGH", args{bg.Mgdl}, fields{Last: 401}, "HIGH"},
+		{"mmol", args{bg.Mmol}, fields{Last: 100}, "5.6"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -191,7 +192,7 @@ func TestReading_UnmarshalJSON(t *testing.T) {
 
 	type fields struct {
 		Mean      json.Number
-		Last      Mgdl
+		Last      bg.BG
 		Mills     Mills
 		Index     json.Number
 		FromMills Mills

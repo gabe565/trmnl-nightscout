@@ -4,9 +4,11 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"strconv"
 	"time"
 
 	"gabe565.com/trmnl-nightscout/assets"
+	"gabe565.com/trmnl-nightscout/internal/bg"
 	"gabe565.com/trmnl-nightscout/internal/config"
 	"gabe565.com/trmnl-nightscout/internal/fetch"
 	"gabe565.com/trmnl-nightscout/internal/imaging"
@@ -98,7 +100,8 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	draw.Draw(final, final.Bounds(), img, image.Point{}, draw.Over)
 
 	invert := conf.Invert
-	if res.Properties.Bgnow.Last.Mgdl() <= conf.InvertBelow || res.Properties.Bgnow.Last.Mgdl() >= conf.InvertAbove {
+	bgnow := res.Properties.Bgnow.Last.Value(conf.Units)
+	if bgnow <= conf.InvertBelow || bgnow >= conf.InvertAbove {
 		invert = !invert
 	}
 	if invert {
@@ -197,12 +200,31 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	p := plot.New()
 	p.BackgroundColor = color.Transparent
 
-	const graphMin, graphMax = 40, 300
+	var graphMin, graphMax float64
+	switch conf.Units {
+	case bg.Mgdl:
+		graphMin, graphMax = 40, 300
+	case bg.Mmol:
+		graphMin, graphMax = 2, 16
+	default:
+		panic("invalid unit")
+	}
 
 	p.Y.Min = graphMin
 	p.Y.Max = graphMax
 	p.Y.Padding = 0
 	p.Y.Tick.Label.Font.Size = 10.8
+	if conf.Units == bg.Mmol {
+		ticks := make(plot.ConstantTicks, 0, int(graphMax-graphMin))
+		for i := graphMin; i <= graphMax; i++ {
+			tick := plot.Tick{Value: i}
+			if int(i)%2 == 0 {
+				tick.Label = strconv.FormatFloat(i, 'f', -1, 64)
+			}
+			ticks = append(ticks, tick)
+		}
+		p.Y.Tick.Marker = ticks
+	}
 
 	now := time.Now()
 	p.X.Min = float64(now.Add(-conf.GraphDuration).Unix())
@@ -296,10 +318,10 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	// Points
 	points := make(plotter.XYs, 0, len(res.Entries))
 	for _, entry := range res.Entries {
-		reading := max(graphMin, min(graphMax, entry.SGV.Mgdl()))
+		reading := max(graphMin, min(graphMax, entry.SGV.Value(conf.Units)))
 		points = append(points, plotter.XY{
 			X: float64(entry.Date.Unix()),
-			Y: float64(reading),
+			Y: reading,
 		})
 	}
 

@@ -1,6 +1,10 @@
 package config
 
-import "time"
+import (
+	"time"
+
+	"gabe565.com/trmnl-nightscout/internal/bg"
+)
 
 //go:generate go tool envdoc -output ../../config.md
 type Config struct {
@@ -21,7 +25,7 @@ type Config struct {
 	NightscoutToken string `env:"NIGHTSCOUT_TOKEN"`
 
 	// Blood sugar unit. (one of: mg/dL, mmol/L)
-	Units Unit `env:"NIGHTSCOUT_UNITS"`
+	Units bg.Unit `env:"NIGHTSCOUT_UNITS"`
 	// Customize the time format. Use `3:04 PM` for 12-hour time or `15:04` for 24-hour. See [time](https://pkg.go.dev/time) for more details.
 	TimeFormat string `env:"TIME_FORMAT"      envDefault:"3:04 PM"`
 
@@ -41,9 +45,9 @@ type Config struct {
 	// Render with a black background and a white foreground.
 	Invert bool `env:"INVERT"`
 	// Invert colors when below this value. (Stacks with the `INVERT` option)
-	InvertBelow int `env:"INVERT_BELOW" envDefault:"55"`
+	InvertBelow float64 `env:"INVERT_BELOW" envDefault:"55"`
 	// Invert colors when above this value. (Stacks with the `INVERT` option)
-	InvertAbove int `env:"INVERT_ABOVE" envDefault:"300"`
+	InvertAbove float64 `env:"INVERT_ABOVE" envDefault:"300"`
 
 	// Time to wait before the next reading should be ready. In testing, this seems to be about 20s behind, so the default is 30s to be safe. Your results may vary.
 	FetchDelay time.Duration `env:"FETCH_DELAY"       envDefault:"30s"`

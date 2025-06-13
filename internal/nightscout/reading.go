@@ -5,6 +5,7 @@ import (
 	"math"
 	"strconv"
 
+	"gabe565.com/trmnl-nightscout/internal/bg"
 	"gabe565.com/trmnl-nightscout/internal/config"
 )
 
@@ -15,7 +16,7 @@ const (
 
 type Reading struct {
 	Mean      json.Number `json:"mean"`
-	Last      Mgdl        `json:"last"`
+	Last      bg.BG       `json:"last"`
 	Mills     Mills       `json:"mills"`
 	Index     json.Number `json:"index,omitempty"`
 	FromMills Mills       `json:"fromMills,omitempty"`
@@ -77,7 +78,7 @@ func (r *Reading) UnmarshalJSON(bytes []byte) error {
 	return nil
 }
 
-func (r *Reading) DisplayBg(units config.Unit) string {
+func (r *Reading) DisplayBg(units bg.Unit) string {
 	switch r.Last {
 	case LowReading:
 		return "LOW"
@@ -85,11 +86,11 @@ func (r *Reading) DisplayBg(units config.Unit) string {
 		return "HIGH"
 	}
 
-	if units == config.UnitMmol {
+	if units == bg.Mmol {
 		mmol := r.Last.Mmol()
 		mmol = math.Round(mmol*10) / 10
 		return strconv.FormatFloat(mmol, 'f', 1, 64)
 	}
 
-	return strconv.Itoa(r.Last.Mgdl())
+	return strconv.FormatFloat(r.Last.Mgdl(), 'f', -1, 64)
 }

@@ -5,7 +5,7 @@ import (
 	"math"
 	"strconv"
 
-	"gabe565.com/trmnl-nightscout/internal/config"
+	"gabe565.com/trmnl-nightscout/internal/bg"
 )
 
 type Times struct {
@@ -19,14 +19,14 @@ type Delta struct {
 	ElapsedMins  json.Number `json:"elapsedMins"`
 	Interpolated bool        `json:"interpolated"`
 	Mean5MinsAgo json.Number `json:"mean5MinsAgo"`
-	Mgdl         Mgdl        `json:"mgdl"`
+	Mgdl         bg.BG       `json:"mgdl"`
 	Previous     Reading     `json:"previous"`
 	Scaled       json.Number `json:"scaled"`
 	Times        Times       `json:"times"`
 }
 
-func (d Delta) Display(units config.Unit) string {
-	if units == config.UnitMmol {
+func (d Delta) Display(units bg.Unit) string {
+	if units == bg.Mmol {
 		mmol := d.Mgdl.Mmol()
 		mmol = math.Round(mmol*10) / 10
 		f := strconv.FormatFloat(mmol, 'f', -1, 64)
@@ -37,7 +37,7 @@ func (d Delta) Display(units config.Unit) string {
 	}
 
 	mgdl := d.Mgdl.Mgdl()
-	val := strconv.Itoa(mgdl)
+	val := strconv.FormatFloat(mgdl, 'f', -1, 64)
 	if mgdl >= 0 {
 		return "+" + val
 	}

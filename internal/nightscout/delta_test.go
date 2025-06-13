@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"gabe565.com/trmnl-nightscout/internal/config"
+	"gabe565.com/trmnl-nightscout/internal/bg"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,13 +16,13 @@ func TestDelta_Display(t *testing.T) {
 		ElapsedMins  json.Number
 		Interpolated bool
 		Mean5MinsAgo json.Number
-		Mgdl         Mgdl
+		Mgdl         bg.BG
 		Previous     Reading
 		Scaled       json.Number
 		Times        Times
 	}
 	type args struct {
-		units config.Unit
+		units bg.Unit
 	}
 	tests := []struct {
 		name   string
@@ -32,25 +32,25 @@ func TestDelta_Display(t *testing.T) {
 	}{
 		{
 			"mgdl",
-			args{config.UnitMgdl},
+			args{bg.Mgdl},
 			fields{Mgdl: 1},
 			"+1",
 		},
 		{
 			"mmol",
-			args{config.UnitMmol},
+			args{bg.Mmol},
 			fields{Mgdl: 9},
 			"+0.5",
 		},
 		{
 			"mmol no decimal",
-			args{config.UnitMmol},
+			args{bg.Mmol},
 			fields{Mgdl: 0},
 			"+0",
 		},
 		{
 			"mmol negative",
-			args{config.UnitMmol},
+			args{bg.Mmol},
 			fields{Mgdl: -9},
 			"-0.5",
 		},

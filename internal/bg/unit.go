@@ -1,5 +1,5 @@
 //nolint:recvcheck
-package config
+package bg
 
 const MmolConversionFactor = 0.0555
 
@@ -8,6 +8,6 @@ const MmolConversionFactor = 0.0555
 type Unit uint8
 
 const (
-	UnitMgdl Unit = iota // mg/dL
-	UnitMmol             // mmol/L
+	Mgdl Unit = iota // mg/dL
+	Mmol             // mmol/L
 )
