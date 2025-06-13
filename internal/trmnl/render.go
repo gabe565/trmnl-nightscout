@@ -35,10 +35,10 @@ const (
 
 //nolint:gochecknoglobals
 var (
-	light40    font.Face
-	light128   font.Face
-	regular39  font.Face
-	semiBold20 font.Face
+	light23    font.Face
+	light74    font.Face
+	regular23  font.Face
+	semiBold12 font.Face
 )
 
 //nolint:gochecknoinits
@@ -51,26 +51,26 @@ func init() {
 	plotter.DefaultFont = plotFont
 
 	light := must.Must2(opentype.Parse(assets.InterLight))
-	light40 = must.Must2(opentype.NewFace(light, &opentype.FaceOptions{
+	light23 = must.Must2(opentype.NewFace(light, &opentype.FaceOptions{
 		Size:    23,
 		DPI:     DPI,
 		Hinting: font.HintingFull,
 	}))
-	light128 = must.Must2(opentype.NewFace(light, &opentype.FaceOptions{
+	light74 = must.Must2(opentype.NewFace(light, &opentype.FaceOptions{
 		Size:    74,
 		DPI:     DPI,
 		Hinting: font.HintingFull,
 	}))
 
 	regular := must.Must2(opentype.Parse(assets.InterRegular))
-	regular39 = must.Must2(opentype.NewFace(regular, &opentype.FaceOptions{
+	regular23 = must.Must2(opentype.NewFace(regular, &opentype.FaceOptions{
 		Size:    22.6,
 		DPI:     DPI,
 		Hinting: font.HintingFull,
 	}))
 
 	semiBold := must.Must2(opentype.Parse(assets.InterSemiBold))
-	semiBold20 = must.Must2(opentype.NewFace(semiBold, &opentype.FaceOptions{
+	semiBold12 = must.Must2(opentype.NewFace(semiBold, &opentype.FaceOptions{
 		Size:    11.5,
 		DPI:     DPI,
 		Hinting: font.HintingFull,
@@ -127,7 +127,7 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	}
 
 	// Last reading
-	drawer.Face = light128
+	drawer.Face = light74
 	const readingX, readingY = 49, 140
 	drawer.Dot = fixed.P(readingX, readingY)
 	drawer.DrawString(res.Properties.Bgnow.DisplayBg(conf.Units))
@@ -136,26 +136,26 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 		// Strikethrough
 		dc.SetLineCapButt()
 		dc.SetLineWidth(6)
-		y := readingY - float64(light128.Metrics().XHeight)/64/2
+		y := readingY - float64(light74.Metrics().XHeight)/64/2
 		dc.DrawLine(readingX, y, float64(drawer.Dot.X)/64, y)
 		dc.Stroke()
 		dc.SetLineCapRound()
 		dc.SetLineWidth(1)
 	}
 
-	drawer.Face = light40
+	drawer.Face = light23
 	drawer.DrawString(" mg/dL")
 
-	drawer.Face = semiBold20
+	drawer.Face = semiBold12
 	drawer.Dot = fixed.P(45, 170)
 	drawer.DrawString("Last reading")
 
 	// Updated
-	drawer.Face = regular39
+	drawer.Face = regular23
 	drawer.Dot = fixed.P(450, 68)
 	drawer.DrawString(res.Properties.Bgnow.Mills.Format(conf.TimeFormat))
 
-	drawer.Face = semiBold20
+	drawer.Face = semiBold12
 	drawer.Dot = fixed.P(450, 93)
 	drawer.DrawString("Updated")
 
@@ -164,20 +164,20 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	draw.Draw(img, nightscout.Bounds().Add(image.Pt(630, 33)), nightscout, image.Point{}, draw.Over)
 
 	// Direction
-	drawer.Face = regular39
+	drawer.Face = regular23
 	drawer.Dot = fixed.P(450, 163)
 	drawer.DrawString(res.Properties.Bgnow.Arrow())
 
-	drawer.Face = semiBold20
+	drawer.Face = semiBold12
 	drawer.Dot = fixed.P(450, 183)
 	drawer.DrawString("Direction")
 
 	// Delta
-	drawer.Face = regular39
+	drawer.Face = regular23
 	drawer.Dot = fixed.P(640, 163)
 	drawer.DrawString(res.Properties.Delta.Display(conf.Units))
 
-	drawer.Face = semiBold20
+	drawer.Face = semiBold12
 	drawer.Dot = fixed.P(640, 183)
 	drawer.DrawString("Delta")
 
