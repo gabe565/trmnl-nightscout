@@ -117,7 +117,7 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	// Draw regular lines
 	dc := gg.NewContextForRGBA(img)
 	dc.SetDash(2, 4)
-	dc.DrawLine(430, 113, 759, 113)
+	dc.DrawLine(440, 113, 769, 113)
 	dc.Stroke()
 	dc.SetDash()
 
@@ -152,33 +152,33 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 
 	// Updated
 	drawer.Face = regular23
-	drawer.Dot = fixed.P(450, 68)
+	drawer.Dot = fixed.P(460, 68)
 	drawer.DrawString(res.Properties.Bgnow.Mills.Format(conf.TimeFormat))
 
 	drawer.Face = semiBold12
-	drawer.Dot = fixed.P(450, 93)
+	drawer.Dot = fixed.P(460, 93)
 	drawer.DrawString("Updated")
 
 	// Nightscout logo
 	nightscout := assets.Nightscout()
-	draw.Draw(img, nightscout.Bounds().Add(image.Pt(630, 33)), nightscout, image.Point{}, draw.Over)
+	draw.Draw(img, nightscout.Bounds().Add(image.Pt(650, 33)), nightscout, image.Point{}, draw.Over)
 
 	// Direction
 	drawer.Face = regular23
-	drawer.Dot = fixed.P(450, 163)
+	drawer.Dot = fixed.P(460, 163)
 	drawer.DrawString(res.Properties.Bgnow.Arrow())
 
 	drawer.Face = semiBold12
-	drawer.Dot = fixed.P(450, 183)
+	drawer.Dot = fixed.P(460, 183)
 	drawer.DrawString("Direction")
 
 	// Delta
 	drawer.Face = regular23
-	drawer.Dot = fixed.P(640, 163)
+	drawer.Dot = fixed.P(660, 163)
 	drawer.DrawString(res.Properties.Delta.Display(conf.Units))
 
 	drawer.Face = semiBold12
-	drawer.Dot = fixed.P(640, 183)
+	drawer.Dot = fixed.P(660, 183)
 	drawer.DrawString("Delta")
 
 	// Draw dithered lines
@@ -186,13 +186,13 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	dc.SetColor(color.Gray{Y: 0xF2})
 	dc.DrawRoundedRectangle(25, 30, 10, 150, 5)
 	dc.Fill()
-	dc.DrawRoundedRectangle(430, 30, 10, 70, 5)
+	dc.DrawRoundedRectangle(440, 30, 10, 70, 5)
 	dc.Fill()
-	dc.DrawRoundedRectangle(620, 30, 10, 70, 5)
+	dc.DrawRoundedRectangle(640, 30, 10, 70, 5)
 	dc.Fill()
-	dc.DrawRoundedRectangle(430, 125, 10, 70, 5)
+	dc.DrawRoundedRectangle(440, 125, 10, 70, 5)
 	dc.Fill()
-	dc.DrawRoundedRectangle(620, 125, 10, 70, 5)
+	dc.DrawRoundedRectangle(640, 125, 10, 70, 5)
 	dc.Fill()
 }
 
