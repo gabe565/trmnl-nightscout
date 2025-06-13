@@ -3,7 +3,7 @@
 ## Config
 
  - `LISTEN_ADDRESS` (**required**, non-empty, default: `:8080`) - HTTP server bind address.
- - `PUBLIC_URL` (**required**, non-empty) - This app's public URL.
+ - `IMAGE_URL` (**required**, non-empty) - A URL that the TRMNL device can use to download the image from this app. It can be a public URL or an internal IP address as long as the TRMNL device is on the same network.
  - `ACCESS_TOKEN` - Token required to access the API. If set, the value must be provided as a `token` query parameter.
  - `REAL_IP_HEADER` (default: `false`) - Get client IP address from the "Real-IP" header.
  - `NIGHTSCOUT_URL` (**required**, non-empty) - Nightscout base URL

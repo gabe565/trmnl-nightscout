@@ -105,7 +105,7 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	u, err := url.Parse(s.conf.PublicURL)
+	u, err := url.Parse(s.conf.ImageURL)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

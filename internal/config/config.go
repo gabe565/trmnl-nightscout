@@ -12,8 +12,8 @@ type Config struct {
 
 	// HTTP server bind address.
 	ListenAddress string `env:"LISTEN_ADDRESS,notEmpty" envDefault:":8080"`
-	// This app's public URL.
-	PublicURL string `env:"PUBLIC_URL,notEmpty"`
+	// A URL that the TRMNL device can use to download the image from this app. It can be a public URL or an internal IP address as long as the TRMNL device is on the same network.
+	ImageURL string `env:"IMAGE_URL,notEmpty"`
 	// Token required to access the API. If set, the value must be provided as a `token` query parameter.
 	AccessToken string `env:"ACCESS_TOKEN"`
 	// Get client IP address from the "Real-IP" header.
