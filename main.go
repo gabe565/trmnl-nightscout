@@ -10,7 +10,10 @@ import (
 
 	"gabe565.com/trmnl-nightscout/internal/config"
 	"gabe565.com/trmnl-nightscout/internal/server"
+	"gabe565.com/trmnl-nightscout/internal/util"
 )
+
+var version = "beta"
 
 func main() {
 	if err := run(); err != nil {
@@ -25,8 +28,16 @@ func run() error {
 		return err
 	}
 
+	if version == "beta" {
+		conf.Version = util.GetCommit()
+	} else {
+		conf.Version = version
+	}
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
+
+	slog.Info("TRMNL Nightscout", "version", version, "commit", util.GetCommit())
 
 	return server.New(conf).ListenAndServe(ctx)
 }
