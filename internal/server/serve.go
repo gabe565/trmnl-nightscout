@@ -98,10 +98,9 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 		stamp = s.started
 	} else {
 		age := time.Since(stamp)
-		interval := last.Properties.Interval()
-		if age > interval+s.conf.FetchDelay {
-			missed := int(age / interval)
-			stamp = stamp.Add(time.Duration(missed) * interval)
+		if age > s.conf.UpdateInterval+s.conf.FetchDelay {
+			missed := int(age / s.conf.UpdateInterval)
+			stamp = stamp.Add(time.Duration(missed) * s.conf.UpdateInterval)
 		}
 	}
 
@@ -119,7 +118,7 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 		u.RawQuery = q.Encode()
 	}
 
-	refreshRate := time.Until(last.Properties.NextTimestamp()) + s.conf.FetchDelay
+	refreshRate := time.Until(last.Properties.Bgnow.Mills.Time) + s.conf.UpdateInterval + s.conf.FetchDelay
 	refreshRate = max(refreshRate, 60*time.Second)
 
 	buf := bytes.NewBuffer(make([]byte, 0, 256))

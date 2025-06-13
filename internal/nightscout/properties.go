@@ -1,8 +1,6 @@
 package nightscout
 
 import (
-	"time"
-
 	"gabe565.com/trmnl-nightscout/internal/config"
 )
 
@@ -23,16 +21,4 @@ func (p Properties) String(conf *config.Config) string {
 		result += " [" + p.Bgnow.Mills.Relative(true) + "]"
 	}
 	return result
-}
-
-func (p Properties) NextTimestamp() time.Time {
-	return p.Bgnow.Mills.Add(p.Interval())
-}
-
-func (p Properties) Interval() time.Duration {
-	mins, err := p.Delta.ElapsedMins.Float64()
-	if err != nil {
-		return 5 * time.Minute
-	}
-	return time.Duration(mins * float64(time.Minute)).Round(time.Minute)
 }

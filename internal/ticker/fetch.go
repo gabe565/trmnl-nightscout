@@ -43,6 +43,6 @@ func (t *Ticker) Fetch() time.Duration {
 	t.error = nil
 	t.mu.Unlock()
 
-	next := time.Until(res.Properties.NextTimestamp()) + t.config.FetchDelay
+	next := time.Until(res.Properties.Bgnow.Mills.Time) + t.config.UpdateInterval + t.config.FetchDelay
 	return max(next, t.config.FallbackInterval)
 }
