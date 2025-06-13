@@ -200,26 +200,16 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	p := plot.New()
 	p.BackgroundColor = color.Transparent
 
-	var graphMin, graphMax float64
-	switch conf.Units {
-	case bg.Mgdl:
-		graphMin, graphMax = 40, 300
-	case bg.Mmol:
-		graphMin, graphMax = 2, 16
-	default:
-		panic("invalid unit")
-	}
-
-	p.Y.Min = graphMin
-	p.Y.Max = graphMax
+	p.Y.Min = float64(conf.GraphMin)
+	p.Y.Max = float64(conf.GraphMax)
 	p.Y.Padding = 0
 	p.Y.Tick.Label.Font.Size = 10.8
 	if conf.Units == bg.Mmol {
-		ticks := make(plot.ConstantTicks, 0, int(graphMax-graphMin))
-		for i := graphMin; i <= graphMax; i++ {
-			tick := plot.Tick{Value: i}
-			if int(i)%2 == 0 {
-				tick.Label = strconv.FormatFloat(i, 'f', -1, 64)
+		ticks := make(plot.ConstantTicks, 0, conf.GraphMax-conf.GraphMin+1)
+		for i := conf.GraphMin; i <= conf.GraphMax; i++ {
+			tick := plot.Tick{Value: float64(i)}
+			if i%2 == 0 {
+				tick.Label = strconv.Itoa(i)
 			}
 			ticks = append(ticks, tick)
 		}
@@ -318,7 +308,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	// Points
 	points := make(plotter.XYs, 0, len(res.Entries))
 	for _, entry := range res.Entries {
-		reading := max(graphMin, min(graphMax, entry.SGV.Value(conf.Units)))
+		reading := max(float64(conf.GraphMin), min(float64(conf.GraphMax), entry.SGV.Value(conf.Units)))
 		points = append(points, plotter.XY{
 			X: float64(entry.Date.Unix()),
 			Y: reading,

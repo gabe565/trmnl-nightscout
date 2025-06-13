@@ -24,6 +24,12 @@ func Load() (*Config, error) {
 		if conf.InvertBelow > 39 {
 			conf.InvertBelow = bg.BG(conf.InvertBelow).Mmol()
 		}
+		if conf.GraphMin > 39 {
+			conf.GraphMin = 2
+		}
+		if conf.GraphMax > 39 {
+			conf.GraphMax = 16
+		}
 	}
 
 	return &conf, nil

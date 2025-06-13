@@ -33,6 +33,10 @@ type Config struct {
 
 	// How far back in time the graph should go.
 	GraphDuration time.Duration `env:"GRAPH_DURATION" envDefault:"6h"`
+	// Minimum X-axis value.
+	GraphMin int `env:"GRAPH_MIN"      envDefault:"40"`
+	// Maximum X-axis value.
+	GraphMax int `env:"GRAPH_MAX"      envDefault:"300"`
 
 	// Where to draw the upper line.
 	HighThreshold float64 `env:"HIGH_THRESHOLD"        envDefault:"200"`

@@ -11,6 +11,8 @@
  - `NIGHTSCOUT_UNITS` - Blood sugar unit. (one of: mg/dL, mmol/L)
  - `TIME_FORMAT` (default: `3:04 PM`) - Customize the time format. Use `3:04 PM` for 12-hour time or `15:04` for 24-hour. See [time](https://pkg.go.dev/time) for more details.
  - `GRAPH_DURATION` (default: `6h`) - How far back in time the graph should go.
+ - `GRAPH_MIN` (default: `40`) - Minimum X-axis value.
+ - `GRAPH_MAX` (default: `300`) - Maximum X-axis value.
  - `HIGH_THRESHOLD` (default: `200`) - Where to draw the upper line.
  - `HIGH_BACKGROUND_SHADE` (default: `250`) - Background shade above the high threshold line. Value must be between 0-255.
  - `LOW_THRESHOLD` (default: `70`) - Where to draw the lower line.
