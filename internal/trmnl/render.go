@@ -117,7 +117,7 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	// Draw regular lines
 	dc := gg.NewContextForRGBA(img)
 	dc.SetDash(2, 4)
-	dc.DrawLine(440, 113, 769, 113)
+	dc.DrawLine(440, 113, Width-Margin, 113)
 	dc.Stroke()
 	dc.SetDash()
 
