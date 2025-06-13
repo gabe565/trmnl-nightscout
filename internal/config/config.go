@@ -10,19 +10,21 @@ import (
 type Config struct {
 	Version string `toml:"-"`
 
-	// HTTP server bind address.
-	ListenAddress string `env:"LISTEN_ADDRESS,notEmpty" envDefault:":8080"`
+	// Nightscout base URL
+	NightscoutURL string `env:"NIGHTSCOUT_URL,required"`
+
 	// A URL that the TRMNL device can use to download the image from this app. It can be a public URL or an internal IP address as long as the TRMNL device is on the same network.
-	ImageURL string `env:"IMAGE_URL,notEmpty"`
+	ImageURL string `env:"IMAGE_URL,required"`
+
+	// Nightscout token. Using an access token is recommended instead of the API secret.
+	NightscoutToken string `env:"NIGHTSCOUT_TOKEN"`
+
+	// HTTP server bind address.
+	ListenAddress string `env:"LISTEN_ADDRESS" envDefault:":8080"`
 	// Token required to access the API. If set, the value must be provided as a `token` query parameter.
 	AccessToken string `env:"ACCESS_TOKEN"`
 	// Get client IP address from the "Real-IP" header.
-	RealIPHeader bool `env:"REAL_IP_HEADER"          envDefault:"false"`
-
-	// Nightscout base URL
-	NightscoutURL string `env:"NIGHTSCOUT_URL,notEmpty"`
-	// Nightscout token. Using an access token is recommended instead of the API secret.
-	NightscoutToken string `env:"NIGHTSCOUT_TOKEN"`
+	RealIPHeader bool `env:"REAL_IP_HEADER" envDefault:"false"`
 
 	// Blood sugar unit. (one of: mg/dL, mmol/L)
 	Units bg.Unit `env:"NIGHTSCOUT_UNITS"`

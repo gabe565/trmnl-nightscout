@@ -2,12 +2,12 @@
 
 ## Config
 
- - `LISTEN_ADDRESS` (**required**, non-empty, default: `:8080`) - HTTP server bind address.
- - `IMAGE_URL` (**required**, non-empty) - A URL that the TRMNL device can use to download the image from this app. It can be a public URL or an internal IP address as long as the TRMNL device is on the same network.
+ - `NIGHTSCOUT_URL` (**required**) - Nightscout base URL
+ - `IMAGE_URL` (**required**) - A URL that the TRMNL device can use to download the image from this app. It can be a public URL or an internal IP address as long as the TRMNL device is on the same network.
+ - `NIGHTSCOUT_TOKEN` - Nightscout token. Using an access token is recommended instead of the API secret.
+ - `LISTEN_ADDRESS` (default: `:8080`) - HTTP server bind address.
  - `ACCESS_TOKEN` - Token required to access the API. If set, the value must be provided as a `token` query parameter.
  - `REAL_IP_HEADER` (default: `false`) - Get client IP address from the "Real-IP" header.
- - `NIGHTSCOUT_URL` (**required**, non-empty) - Nightscout base URL
- - `NIGHTSCOUT_TOKEN` - Nightscout token. Using an access token is recommended instead of the API secret.
  - `NIGHTSCOUT_UNITS` - Blood sugar unit. (one of: mg/dL, mmol/L)
  - `TIME_FORMAT` (default: `3:04 PM`) - Customize the time format. Use `3:04 PM` for 12-hour time or `15:04` for 24-hour. See [time](https://pkg.go.dev/time) for more details.
  - `GRAPH_DURATION` (default: `6h`) - How far back in time the graph should go.
