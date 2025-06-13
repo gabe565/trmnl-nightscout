@@ -19,7 +19,7 @@ TRMNL Nightscout fetches blood sugar data from [Nightscout](https://github.com/n
 
 ## Usage
 
-TRMNL Nightscout is configured entirely via environment variables. The most important settings are the Nightscout URL and token. See [config.md](config.md) for the full list of options. A minimal example:
+TRMNL Nightscout is configured entirely via environment variables. The most important settings are the Nightscout URL and the public image URL. See [config.md](config.md) for the full list of options. A minimal example:
 
 ```bash
 docker run -d \
