@@ -144,7 +144,7 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	}
 
 	drawer.Face = light23
-	drawer.DrawString(" mg/dL")
+	drawer.DrawString(" " + conf.Units.String())
 
 	drawer.Face = semiBold12
 	drawer.Dot = fixed.P(45, 170)
