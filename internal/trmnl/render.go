@@ -43,13 +43,6 @@ var (
 
 //nolint:gochecknoinits
 func init() {
-	plotFont := plotfont.Font{Typeface: "Inter-SemiBold"}
-	plotfont.DefaultCache.Add(plotfont.Collection{
-		{Font: plotFont, Face: must.Must2(opentype.Parse(assets.InterSemiBold))},
-	})
-	plot.DefaultFont = plotFont
-	plotter.DefaultFont = plotFont
-
 	light := must.Must2(opentype.Parse(assets.InterLight))
 	light23 = must.Must2(opentype.NewFace(light, &opentype.FaceOptions{
 		Size:    23,
@@ -75,6 +68,13 @@ func init() {
 		DPI:     DPI,
 		Hinting: font.HintingFull,
 	}))
+
+	plotFont := plotfont.Font{Typeface: "Inter-SemiBold"}
+	plotfont.DefaultCache.Add(plotfont.Collection{
+		{Font: plotFont, Face: semiBold},
+	})
+	plot.DefaultFont = plotFont
+	plotter.DefaultFont = plotFont
 }
 
 func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
