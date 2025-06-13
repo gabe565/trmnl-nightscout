@@ -1,0 +1,75 @@
+version: 2
+project_name: trmnl-nightscout
+before:
+  hooks:
+    - go mod download
+builds:
+  - env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s
+      - -w
+      - -X main.version={{ .Version }}
+    goarch:
+      - amd64
+      - arm64
+archives:
+  - formats: tar.gz
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        formats: zip
+    files:
+      - LICENSE
+      - README.md
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs'
+      - '^test'
+      - '^ci'
+  groups:
+    - title: Features
+      order: 0
+      regexp: "(feat)"
+    - title: Fixes
+      order: 1
+      regexp: "(fix|perf)"
+    - title: Dependencies
+      order: 999
+      regexp: '\(deps\):'
+    - title: Others
+      order: 998
+dockers:
+  - &dockers
+    image_templates:
+      - ghcr.io/gabe565/{{ .ProjectName }}:v{{ .Version }}-amd64
+    use: buildx
+    dockerfile: goreleaser.Dockerfile
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  - <<: *dockers
+    image_templates:
+      - ghcr.io/gabe565/{{ .ProjectName }}:v{{ .Version }}-arm64v8
+    goarch: arm64
+    build_flag_templates:
+      - "--platform=linux/arm64/v8"
+docker_manifests:
+  - &docker_manifests
+    name_template: ghcr.io/gabe565/{{ .ProjectName }}:latest
+    image_templates:
+      - ghcr.io/gabe565/{{ .ProjectName }}:v{{ .Version }}-amd64
+      - ghcr.io/gabe565/{{ .ProjectName }}:v{{ .Version }}-arm64v8
+  - <<: *docker_manifests
+    name_template: ghcr.io/gabe565/{{ .ProjectName }}:v{{ .Version }}
+  - <<: *docker_manifests
+    name_template: ghcr.io/gabe565/{{ .ProjectName }}:v{{ .Major }}
+  - <<: *docker_manifests
+    name_template: ghcr.io/gabe565/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}
