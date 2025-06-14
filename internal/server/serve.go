@@ -16,6 +16,7 @@ import (
 	"gabe565.com/trmnl-nightscout/internal/config"
 	"gabe565.com/trmnl-nightscout/internal/ticker"
 	"gabe565.com/trmnl-nightscout/internal/trmnl"
+	"gabe565.com/utils/bytefmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httprate"
@@ -57,9 +58,10 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	r.Get("/image.png", s.image)
 
 	server := &http.Server{
-		Addr:        s.conf.ListenAddress,
-		Handler:     r,
-		ReadTimeout: 5 * time.Second,
+		Addr:           s.conf.ListenAddress,
+		Handler:        r,
+		ReadTimeout:    5 * time.Second,
+		MaxHeaderBytes: 100 * bytefmt.KiB,
 	}
 
 	group, ctx := errgroup.WithContext(ctx)
