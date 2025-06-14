@@ -28,11 +28,7 @@ func run() error {
 		return err
 	}
 
-	if version == "beta" {
-		conf.Version = util.GetCommit()
-	} else {
-		conf.Version = version
-	}
+	conf.Version = version
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
