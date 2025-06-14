@@ -38,7 +38,7 @@ var (
 	light23    font.Face
 	light74    font.Face
 	regular23  font.Face
-	semiBold12 font.Face
+	semiBold11 font.Face
 )
 
 //nolint:gochecknoinits
@@ -57,14 +57,14 @@ func init() {
 
 	regular := must.Must2(opentype.Parse(assets.InterRegular))
 	regular23 = must.Must2(opentype.NewFace(regular, &opentype.FaceOptions{
-		Size:    22.6,
+		Size:    23,
 		DPI:     DPI,
 		Hinting: font.HintingFull,
 	}))
 
 	semiBold := must.Must2(opentype.Parse(assets.InterSemiBold))
-	semiBold12 = must.Must2(opentype.NewFace(semiBold, &opentype.FaceOptions{
-		Size:    11.5,
+	semiBold11 = must.Must2(opentype.NewFace(semiBold, &opentype.FaceOptions{
+		Size:    11,
 		DPI:     DPI,
 		Hinting: font.HintingFull,
 	}))
@@ -146,7 +146,7 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	drawer.Face = light23
 	drawer.DrawString(" " + conf.Units.String())
 
-	drawer.Face = semiBold12
+	drawer.Face = semiBold11
 	drawer.Dot = fixed.P(45, 170)
 	drawer.DrawString("Last reading")
 
@@ -155,7 +155,7 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	drawer.Dot = fixed.P(460, 68)
 	drawer.DrawString(res.Properties.Bgnow.Mills.Format(conf.TimeFormat))
 
-	drawer.Face = semiBold12
+	drawer.Face = semiBold11
 	drawer.Dot = fixed.P(460, 93)
 	drawer.DrawString("Updated")
 
@@ -168,7 +168,7 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	drawer.Dot = fixed.P(460, 163)
 	drawer.DrawString(res.Properties.Bgnow.Arrow())
 
-	drawer.Face = semiBold12
+	drawer.Face = semiBold11
 	drawer.Dot = fixed.P(460, 183)
 	drawer.DrawString("Direction")
 
@@ -177,7 +177,7 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	drawer.Dot = fixed.P(660, 163)
 	drawer.DrawString(res.Properties.Delta.Display(conf.Units))
 
-	drawer.Face = semiBold12
+	drawer.Face = semiBold11
 	drawer.Dot = fixed.P(660, 183)
 	drawer.DrawString("Delta")
 
@@ -203,7 +203,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	p.Y.Min = float64(conf.GraphMin)
 	p.Y.Max = float64(conf.GraphMax)
 	p.Y.Padding = 0
-	p.Y.Tick.Label.Font.Size = 10.8
+	p.Y.Tick.Label.Font.Size = 10
 	if conf.Units == bg.Mmol {
 		ticks := make(plot.ConstantTicks, 0, conf.GraphMax-conf.GraphMin+1)
 		for i := conf.GraphMin; i <= conf.GraphMax; i++ {
@@ -220,7 +220,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	p.X.Min = float64(now.Add(-conf.GraphDuration).Unix())
 	p.X.Max = float64(now.Unix())
 	p.X.Padding = 0
-	p.X.Tick.Label.Font.Size = 10.8
+	p.X.Tick.Label.Font.Size = 10
 	p.X.Tick.Marker = Ticks(conf)
 
 	// Render numbers and axes to non-dithered layer
