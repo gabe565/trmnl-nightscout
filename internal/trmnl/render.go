@@ -105,9 +105,7 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 		invert = !invert
 	}
 	if invert {
-		if err := imaging.Invert1Bit(final); err != nil {
-			return nil, err
-		}
+		imaging.InvertPaletted(final)
 	}
 
 	return final, nil
