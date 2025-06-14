@@ -13,7 +13,6 @@ import (
 	"gabe565.com/trmnl-nightscout/internal/fetch"
 	"gabe565.com/trmnl-nightscout/internal/imaging"
 	"gabe565.com/utils/must"
-	"git.sr.ht/~sbinet/gg"
 	"github.com/makeworld-the-better-one/dither/v2"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
@@ -79,25 +78,11 @@ func init() {
 
 func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	// Create regular image layer
-	img := image.NewRGBA(image.Rect(0, 0, Width, Height))
+	img := image.NewPaletted(image.Rect(0, 0, Width, Height), imaging.Palette1Bit())
+	draw.Draw(img, img.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
 
-	// Create dithered layer
-	dimg := image.NewRGBA(image.Rect(0, 0, Width, Height))
-	draw.Draw(dimg, dimg.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
-
-	drawText(conf, res, img, dimg)
-	drawPlot(conf, res, img, dimg)
-
-	// Dither
-	d := dither.NewDitherer([]color.Color{color.Black, color.White})
-	d.Matrix = dither.FloydSteinberg
-	d.Serpentine = true
-	d.Dither(dimg)
-
-	// Combine layers
-	final := image.NewPaletted(img.Bounds(), color.Palette{color.Black, color.White})
-	draw.Draw(final, final.Bounds(), dimg, image.Point{}, draw.Src)
-	draw.Draw(final, final.Bounds(), img, image.Point{}, draw.Over)
+	drawText(conf, res, img)
+	drawPlot(conf, res, img)
 
 	invert := conf.Invert
 	bgnow := res.Properties.Bgnow.Last.Value(conf.Units)
@@ -105,26 +90,22 @@ func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 		invert = !invert
 	}
 	if invert {
-		imaging.InvertPaletted(final)
+		imaging.InvertPaletted(img)
 	}
 
-	return final, nil
+	return img, nil
 }
 
-func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
-	// Draw regular lines
-	dc := gg.NewContextForRGBA(img)
-	dc.SetDash(2, 4)
-	dc.DrawLine(440, 113, Width-Margin, 113)
-	dc.Stroke()
-	dc.SetDash()
-
+func drawText(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	drawer := &font.Drawer{
 		Dst: img,
 		Src: image.NewUniform(color.Black),
 	}
+	dots := imaging.NewDots(image.Pt(3, 1), true)
 
 	// Last reading
+	draw.Draw(img, image.Rect(25, 30, 35, 180), dots, image.Pt(0, 1), draw.Src)
+
 	drawer.Face = light74
 	const readingX, readingY = 49, 140
 	drawer.Dot = fixed.P(readingX, readingY)
@@ -132,13 +113,10 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 
 	if time.Since(res.Properties.Bgnow.Mills.Time) > 15*time.Minute {
 		// Strikethrough
-		dc.SetLineCapButt()
-		dc.SetLineWidth(6)
-		y := readingY - float64(light74.Metrics().XHeight)/64/2
-		dc.DrawLine(readingX, y, float64(drawer.Dot.X)/64, y)
-		dc.Stroke()
-		dc.SetLineCapRound()
-		dc.SetLineWidth(1)
+		const thickness = 7
+		y := readingY - int(float64(light74.Metrics().XHeight)/64/2) - thickness/2
+		rect := image.Rect(readingX, y, int(drawer.Dot.X/64), y+thickness)
+		draw.Draw(img, rect, image.NewUniform(color.Black), image.Point{}, draw.Over)
 	}
 
 	drawer.Face = light23
@@ -149,6 +127,8 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	drawer.DrawString("Last reading")
 
 	// Updated
+	draw.Draw(img, image.Rect(440, 30, 450, 100), dots, image.Pt(0, 1), draw.Src)
+
 	drawer.Face = regular23
 	drawer.Dot = fixed.P(460, 68)
 	drawer.DrawString(res.Properties.Bgnow.Mills.Format(conf.TimeFormat))
@@ -158,10 +138,19 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	drawer.DrawString("Updated")
 
 	// Nightscout logo
+	draw.Draw(img, image.Rect(640, 30, 650, 100), dots, image.Pt(0, 1), draw.Src)
+
 	nightscout := assets.Nightscout()
 	draw.Draw(img, nightscout.Bounds().Add(image.Pt(650, 33)), nightscout, image.Point{}, draw.Over)
 
+	// Horizontal separator
+	dots.SetGap(image.Pt(4, 0), false)
+	draw.Draw(img, image.Rect(440, 113, Width-Margin, 114), dots, image.Point{}, draw.Src)
+	dots.SetGap(image.Pt(3, 1), true)
+
 	// Direction
+	draw.Draw(img, image.Rect(440, 125, 450, 195), dots, image.Pt(0, 1), draw.Src)
+
 	drawer.Face = regular23
 	drawer.Dot = fixed.P(460, 163)
 	drawer.DrawString(res.Properties.Bgnow.Arrow())
@@ -171,6 +160,8 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	drawer.DrawString("Direction")
 
 	// Delta
+	draw.Draw(img, image.Rect(640, 125, 650, 195), dots, image.Pt(0, 1), draw.Src)
+
 	drawer.Face = regular23
 	drawer.Dot = fixed.P(660, 163)
 	drawer.DrawString(res.Properties.Delta.Display(conf.Units))
@@ -178,23 +169,9 @@ func drawText(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	drawer.Face = semiBold11
 	drawer.Dot = fixed.P(660, 183)
 	drawer.DrawString("Delta")
-
-	// Draw dithered lines
-	dc = gg.NewContextForRGBA(dimg)
-	dc.SetColor(color.Gray{Y: 0xF2})
-	dc.DrawRoundedRectangle(25, 30, 10, 150, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(440, 30, 10, 70, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(640, 30, 10, 70, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(440, 125, 10, 70, 5)
-	dc.Fill()
-	dc.DrawRoundedRectangle(640, 125, 10, 70, 5)
-	dc.Fill()
 }
 
-func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
+func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	p := plot.New()
 	p.BackgroundColor = color.Transparent
 
@@ -232,7 +209,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 
 	c := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
 	p.Draw(vgdraw.New(c))
-	draw.Draw(img, img.Bounds().Add(image.Pt(Margin, Height/2-Margin)), c.Image(), image.Point{}, draw.Over)
+	axisImg := c.Image()
 
 	p.X.Color = color.Black
 	p.X.Tick.Color = color.Black
@@ -328,7 +305,18 @@ func drawPlot(conf *config.Config, res *fetch.Response, img, dimg *image.RGBA) {
 	// Draw dithered plot parts
 	c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI))
 	p.Draw(vgdraw.New(c))
-	draw.Draw(dimg, dimg.Bounds().Add(image.Pt(Margin, Height/2-Margin)), c.Image(), image.Point{}, draw.Src)
+	plotImg := c.Image()
+
+	// Dither
+	d := dither.NewDitherer(imaging.Palette1Bit())
+	d.Matrix = dither.FloydSteinberg
+	d.Serpentine = true
+	d.Dither(plotImg)
+
+	// Combine layers
+	plotBounds := img.Bounds().Add(image.Pt(Margin, Height/2-Margin))
+	draw.Draw(img, plotBounds, plotImg, image.Point{}, draw.Src)
+	draw.Draw(img, plotBounds, axisImg, image.Point{}, draw.Over)
 }
 
 func Ticks(conf *config.Config) plot.TickerFunc {
