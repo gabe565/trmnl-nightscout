@@ -101,6 +101,7 @@ func drawText(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 		Dst: img,
 		Src: image.NewUniform(color.Black),
 	}
+
 	dots := imaging.NewDots(image.Pt(3, 1), true)
 
 	// Last reading
@@ -127,15 +128,7 @@ func drawText(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	drawer.DrawString("Last reading")
 
 	// Updated
-	draw.Draw(img, image.Rect(440, 30, 450, 100), dots, image.Pt(0, 1), draw.Src)
-
-	drawer.Face = regular23
-	drawer.Dot = fixed.P(460, 68)
-	drawer.DrawString(res.Properties.Bgnow.Mills.Format(conf.TimeFormat))
-
-	drawer.Face = semiBold11
-	drawer.Dot = fixed.P(460, 93)
-	drawer.DrawString("Updated")
+	drawSegment(img, image.Pt(440, 30), "Updated", res.Properties.Bgnow.Mills.Format(conf.TimeFormat))
 
 	// Nightscout logo
 	draw.Draw(img, image.Rect(640, 30, 650, 100), dots, image.Pt(0, 1), draw.Src)
@@ -144,31 +137,32 @@ func drawText(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	draw.Draw(img, nightscout.Bounds().Add(image.Pt(650, 33)), nightscout, image.Point{}, draw.Over)
 
 	// Horizontal separator
-	dots.SetGap(image.Pt(4, 0), false)
-	draw.Draw(img, image.Rect(440, 113, Width-Margin, 114), dots, image.Point{}, draw.Src)
-	dots.SetGap(image.Pt(3, 1), true)
+	draw.Draw(img,
+		image.Rect(440, 113, Width-Margin, 114),
+		imaging.NewDots(image.Pt(4, 0), false),
+		image.Point{}, draw.Src,
+	)
 
-	// Direction
-	draw.Draw(img, image.Rect(440, 125, 450, 195), dots, image.Pt(0, 1), draw.Src)
+	drawSegment(img, image.Pt(440, 125), "Direction", res.Properties.Bgnow.Arrow())
+	drawSegment(img, image.Pt(640, 125), "Delta", res.Properties.Delta.Display(conf.Units))
+}
 
-	drawer.Face = regular23
-	drawer.Dot = fixed.P(460, 163)
-	drawer.DrawString(res.Properties.Bgnow.Arrow())
+func drawSegment(img *image.Paletted, p image.Point, label, value string) {
+	dots := imaging.NewDots(image.Pt(3, 1), true)
+	draw.Draw(img, image.Rect(p.X, p.Y, p.X+10, p.Y+70), dots, image.Pt(0, 1), draw.Src)
 
-	drawer.Face = semiBold11
-	drawer.Dot = fixed.P(460, 183)
-	drawer.DrawString("Direction")
-
-	// Delta
-	draw.Draw(img, image.Rect(640, 125, 650, 195), dots, image.Pt(0, 1), draw.Src)
-
-	drawer.Face = regular23
-	drawer.Dot = fixed.P(660, 163)
-	drawer.DrawString(res.Properties.Delta.Display(conf.Units))
+	drawer := &font.Drawer{
+		Dst: img,
+		Src: image.NewUniform(color.Black),
+	}
 
 	drawer.Face = semiBold11
-	drawer.Dot = fixed.P(660, 183)
-	drawer.DrawString("Delta")
+	drawer.Dot = fixed.P(p.X+20, p.Y+61)
+	drawer.DrawString(label)
+
+	drawer.Face = regular23
+	drawer.Dot = fixed.P(p.X+20, p.Y+38)
+	drawer.DrawString(value)
 }
 
 func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
