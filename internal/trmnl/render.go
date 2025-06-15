@@ -329,11 +329,18 @@ func Ticks(conf *config.Config) plot.TickerFunc {
 		showEvery = 1
 	}
 
+	var lastMin, lastMax float64
+	var ticks []plot.Tick
+
 	return func(minVal, maxVal float64) []plot.Tick {
+		if minVal == lastMin && maxVal == lastMax {
+			return ticks
+		}
+
 		start := time.Unix(int64(minVal), 0).Round(interval)
 		end := time.Unix(int64(maxVal), 0).Round(interval)
 
-		ticks := make([]plot.Tick, 0, int(float64(time.Hour/interval)*end.Sub(start).Hours()+1))
+		ticks = make([]plot.Tick, 0, int(float64(time.Hour/interval)*end.Sub(start).Hours()+1))
 		var hourIdx int
 
 		for t := start; !t.After(end); t = t.Add(interval) {
@@ -351,6 +358,7 @@ func Ticks(conf *config.Config) plot.TickerFunc {
 			ticks = append(ticks, tick)
 		}
 
+		lastMin, lastMax = minVal, maxVal
 		return ticks
 	}
 }
