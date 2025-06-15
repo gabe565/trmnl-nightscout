@@ -29,15 +29,15 @@ func TestReading_Arrow(t *testing.T) {
 		fields fields
 		want   string
 	}{
-		{"TripleUp", fields{Sgvs: []SGV{{Direction: "TripleUp"}}}, "⇈"},
-		{"DoubleUp", fields{Sgvs: []SGV{{Direction: "DoubleUp"}}}, "⇈"},
+		{"TripleUp", fields{Sgvs: []SGV{{Direction: "TripleUp"}}}, "↑↑↑"},
+		{"DoubleUp", fields{Sgvs: []SGV{{Direction: "DoubleUp"}}}, "↑↑"},
 		{"SingleUp", fields{Sgvs: []SGV{{Direction: "SingleUp"}}}, "↑"},
 		{"FortyFiveUp", fields{Sgvs: []SGV{{Direction: "FortyFiveUp"}}}, "↗"},
 		{"Flat", fields{Sgvs: []SGV{{Direction: "Flat"}}}, "→"},
 		{"FortyFiveDown", fields{Sgvs: []SGV{{Direction: "FortyFiveDown"}}}, "↘"},
 		{"SingleDown", fields{Sgvs: []SGV{{Direction: "SingleDown"}}}, "↓"},
-		{"DoubleDown", fields{Sgvs: []SGV{{Direction: "DoubleDown"}}}, "⇊"},
-		{"TripleDown", fields{Sgvs: []SGV{{Direction: "TripleDown"}}}, "⇊"},
+		{"DoubleDown", fields{Sgvs: []SGV{{Direction: "DoubleDown"}}}, "↓↓"},
+		{"TripleDown", fields{Sgvs: []SGV{{Direction: "TripleDown"}}}, "↓↓↓"},
 		{"unknown", fields{}, "-"},
 	}
 	for _, tt := range tests {

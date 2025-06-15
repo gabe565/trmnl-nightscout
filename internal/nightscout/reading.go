@@ -30,8 +30,10 @@ func (r *Reading) Arrow() string {
 		direction = r.Sgvs[0].Direction
 	}
 	switch direction {
-	case "DoubleUp", "TripleUp":
-		return "⇈"
+	case "TripleUp":
+		return "↑↑↑"
+	case "DoubleUp":
+		return "↑↑"
 	case "SingleUp":
 		return "↑"
 	case "FortyFiveUp":
@@ -42,8 +44,10 @@ func (r *Reading) Arrow() string {
 		return "↘"
 	case "SingleDown":
 		return "↓"
-	case "DoubleDown", "TripleDown":
-		return "⇊"
+	case "DoubleDown":
+		return "↓↓"
+	case "TripleDown":
+		return "↓↓↓"
 	default:
 		return "-"
 	}
