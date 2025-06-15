@@ -34,10 +34,11 @@ const (
 
 //nolint:gochecknoglobals
 var (
-	light23    font.Face
-	light74    font.Face
-	regular23  font.Face
-	semiBold11 font.Face
+	light23     font.Face
+	light74     font.Face
+	regular23   font.Face
+	semiBold11  font.Face
+	openArrow23 font.Face
 )
 
 //nolint:gochecknoinits
@@ -74,6 +75,13 @@ func init() {
 	})
 	plot.DefaultFont = plotFont
 	plotter.DefaultFont = plotFont
+
+	openArrow := must.Must2(opentype.Parse(assets.OpenArrow))
+	openArrow23 = must.Must2(opentype.NewFace(openArrow, &opentype.FaceOptions{
+		Size:    20,
+		DPI:     DPI,
+		Hinting: font.HintingFull,
+	}))
 }
 
 func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
@@ -143,9 +151,11 @@ func drawText(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 		image.Point{}, draw.Src,
 	)
 
-	drawSegment(img, image.Pt(440, 125), "Direction", res.Properties.Bgnow.Arrow())
+	drawSegment(img, image.Pt(440, 125), directionLabel, res.Properties.Bgnow.Arrow())
 	drawSegment(img, image.Pt(640, 125), "Delta", res.Properties.Delta.Display(conf.Units))
 }
+
+const directionLabel = "Direction"
 
 func drawSegment(img *image.Paletted, p image.Point, label, value string) {
 	dots := imaging.NewDots(image.Pt(3, 1), true)
@@ -161,6 +171,9 @@ func drawSegment(img *image.Paletted, p image.Point, label, value string) {
 	drawer.DrawString(label)
 
 	drawer.Face = regular23
+	if label == directionLabel {
+		drawer.Face = openArrow23
+	}
 	drawer.Dot = fixed.P(p.X+20, p.Y+38)
 	drawer.DrawString(value)
 }

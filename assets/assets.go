@@ -20,6 +20,8 @@ var (
 	InterRegular []byte
 	//go:embed Inter_18pt-SemiBold.ttf
 	InterSemiBold []byte
+	//go:embed OpenArrow-Regular.otf
+	OpenArrow []byte
 )
 
 func Nightscout() image.Image {
