@@ -140,7 +140,7 @@ func (f *Fetch) fetchProperties(ctx context.Context) (*nightscout.Properties, er
 		return nil, err
 	}
 
-	u.Path = path.Join(u.Path, "/api/v2/properties/bgnow,buckets,delta,direction")
+	u.Path = path.Join(u.Path, "/api/v2/properties/bgnow,delta,direction")
 
 	var properties *nightscout.Properties
 	res, err := f.request(ctx, u.String(), f.propertiesEtag, &properties)

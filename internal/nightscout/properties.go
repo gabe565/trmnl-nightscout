@@ -6,7 +6,6 @@ import (
 
 type Properties struct {
 	Bgnow     Reading   `json:"bgnow"`
-	Buckets   []Reading `json:"buckets"`
 	Delta     Delta     `json:"delta"`
 	Direction Direction `json:"direction"`
 }

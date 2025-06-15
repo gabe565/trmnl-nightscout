@@ -43,10 +43,8 @@ func TestProperties_String(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			p := Properties{
-				Bgnow:     tt.fields.Bgnow,
-				Buckets:   tt.fields.Buckets,
-				Delta:     tt.fields.Delta,
-				Direction: tt.fields.Direction,
+				Bgnow: tt.fields.Bgnow,
+				Delta: tt.fields.Delta,
 			}
 			assert.Equal(t, tt.want, p.String(tt.args.conf))
 		})

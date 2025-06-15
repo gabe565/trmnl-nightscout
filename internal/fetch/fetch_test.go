@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"gabe565.com/trmnl-nightscout/internal/config"
 	"gabe565.com/trmnl-nightscout/internal/nightscout"
@@ -55,7 +56,7 @@ func TestFetch_Do(t *testing.T) {
 	}{
 		{
 			"no url",
-			fields{config: &config.Config{}},
+			fields{config: &config.Config{UpdateInterval: 5 * time.Minute}},
 			args{t.Context()},
 			nil,
 			"", "",
@@ -63,7 +64,7 @@ func TestFetch_Do(t *testing.T) {
 		},
 		{
 			"success",
-			fields{config: &config.Config{NightscoutURL: server.URL}},
+			fields{config: &config.Config{NightscoutURL: server.URL, UpdateInterval: 5 * time.Minute}},
 			args{t.Context()},
 			&Response{Properties: testproperties.Properties, Entries: []nightscout.SGVv1{}},
 			testproperties.Etag, "",
@@ -71,7 +72,10 @@ func TestFetch_Do(t *testing.T) {
 		},
 		{
 			"same etag",
-			fields{config: &config.Config{NightscoutURL: server.URL}, propertiesEtag: testproperties.Etag},
+			fields{
+				config:         &config.Config{NightscoutURL: server.URL, UpdateInterval: 5 * time.Minute},
+				propertiesEtag: testproperties.Etag,
+			},
 			args{t.Context()},
 			nil,
 			testproperties.Etag, "",
@@ -80,7 +84,7 @@ func TestFetch_Do(t *testing.T) {
 		{
 			"different etag",
 			fields{
-				config:         &config.Config{NightscoutURL: server.URL},
+				config:         &config.Config{NightscoutURL: server.URL, UpdateInterval: 5 * time.Minute},
 				propertiesEtag: etag.Generate([]byte("test"), true),
 			},
 			args{t.Context()},
