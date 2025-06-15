@@ -186,7 +186,8 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	}
 
 	now := time.Now()
-	p.X.Min = float64(now.Add(-conf.GraphDuration).Unix())
+	start := now.Add(-conf.GraphDuration)
+	p.X.Min = float64(start.Unix())
 	p.X.Max = float64(now.Unix())
 	p.X.Padding = 0
 	p.X.Tick.Label.Font.Size = 10
@@ -277,6 +278,9 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	// Points
 	points := make(plotter.XYs, 0, len(res.Entries))
 	for _, entry := range res.Entries {
+		if entry.Date.Before(start) {
+			continue
+		}
 		reading := max(float64(conf.GraphMin), min(float64(conf.GraphMax), entry.SGV.Value(conf.Units)))
 		points = append(points, plotter.XY{
 			X: float64(entry.Date.Unix()),
