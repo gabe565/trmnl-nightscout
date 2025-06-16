@@ -113,10 +113,10 @@ func drawText(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	dots := imaging.NewDots(image.Pt(3, 1), true)
 
 	// Last reading
-	draw.Draw(img, image.Rect(25, 30, 35, 180), dots, image.Pt(0, 1), draw.Src)
+	draw.Draw(img, image.Rect(25, 30, 35, 196), dots, image.Pt(0, 1), draw.Src)
 
 	drawer.Face = light74
-	const readingX, readingY = 49, 140
+	const readingX, readingY = 49, 149
 	drawer.Dot = fixed.P(readingX, readingY)
 	drawer.DrawString(res.Properties.Bgnow.DisplayBg(conf.Units))
 
@@ -132,7 +132,7 @@ func drawText(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	drawer.DrawString(" " + conf.Units.String())
 
 	drawer.Face = semiBold11
-	drawer.Dot = fixed.P(45, 170)
+	drawer.Dot = fixed.P(45, 179)
 	drawer.DrawString("Last reading")
 
 	// Updated
