@@ -219,6 +219,18 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	p.Y.Color = color.Black
 	p.Y.Tick.Color = color.Black
 
+	gridLine := vgdraw.LineStyle{
+		Color:  color.Black,
+		Width:  1,
+		Dashes: []vg.Length{1, 5},
+	}
+
+	thresholdLine := vgdraw.LineStyle{
+		Color:  color.Black,
+		Width:  1,
+		Dashes: []vg.Length{4, 2},
+	}
+
 	p.Add(
 		// High threshold background
 		&plotter.Polygon{
@@ -244,16 +256,8 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 
 		// Grid
 		&plotter.Grid{
-			Vertical: vgdraw.LineStyle{
-				Color:  color.Black,
-				Width:  1,
-				Dashes: []vg.Length{1, 5},
-			},
-			Horizontal: vgdraw.LineStyle{
-				Color:  color.Black,
-				Width:  1,
-				Dashes: []vg.Length{1, 5},
-			},
+			Vertical:   gridLine,
+			Horizontal: gridLine,
 		},
 
 		// High threshold
@@ -262,11 +266,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 				{X: p.X.Min, Y: conf.HighThreshold},
 				{X: p.X.Max, Y: conf.HighThreshold},
 			},
-			LineStyle: vgdraw.LineStyle{
-				Color:  color.Black,
-				Width:  1,
-				Dashes: []vg.Length{4, 2},
-			},
+			LineStyle: thresholdLine,
 		},
 
 		// Low threshold
@@ -275,11 +275,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 				{X: p.X.Min, Y: conf.LowThreshold},
 				{X: p.X.Max, Y: conf.LowThreshold},
 			},
-			LineStyle: vgdraw.LineStyle{
-				Color:  color.Black,
-				Width:  1,
-				Dashes: []vg.Length{4, 2},
-			},
+			LineStyle: thresholdLine,
 		},
 	)
 
