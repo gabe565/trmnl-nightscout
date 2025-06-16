@@ -45,28 +45,24 @@ var (
 func init() {
 	light := must.Must2(opentype.Parse(assets.InterLight))
 	light23 = must.Must2(opentype.NewFace(light, &opentype.FaceOptions{
-		Size:    23,
-		DPI:     DPI,
-		Hinting: font.HintingFull,
+		Size: 23,
+		DPI:  DPI,
 	}))
 	light74 = must.Must2(opentype.NewFace(light, &opentype.FaceOptions{
-		Size:    74,
-		DPI:     DPI,
-		Hinting: font.HintingFull,
+		Size: 74,
+		DPI:  DPI,
 	}))
 
 	regular := must.Must2(opentype.Parse(assets.InterRegular))
 	regular23 = must.Must2(opentype.NewFace(regular, &opentype.FaceOptions{
-		Size:    23,
-		DPI:     DPI,
-		Hinting: font.HintingFull,
+		Size: 23,
+		DPI:  DPI,
 	}))
 
 	semiBold := must.Must2(opentype.Parse(assets.InterSemiBold))
 	semiBold11 = must.Must2(opentype.NewFace(semiBold, &opentype.FaceOptions{
-		Size:    11,
-		DPI:     DPI,
-		Hinting: font.HintingFull,
+		Size: 11,
+		DPI:  DPI,
 	}))
 
 	plotFont := plotfont.Font{Typeface: "Inter-SemiBold"}
@@ -78,9 +74,8 @@ func init() {
 
 	openArrow := must.Must2(opentype.Parse(assets.OpenArrow))
 	openArrow23 = must.Must2(opentype.NewFace(openArrow, &opentype.FaceOptions{
-		Size:    20,
-		DPI:     DPI,
-		Hinting: font.HintingFull,
+		Size: 20,
+		DPI:  DPI,
 	}))
 }
 
