@@ -28,8 +28,6 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Test
-        env:
-          TZ: America/Chicago
         run: go test ./...
 
   build:
