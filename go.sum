@@ -30,8 +30,8 @@ github.com/dmarkham/enumer v1.5.11 h1:quorLCaEfzjJ23Pf7PB9lyyaHseh91YfTM/sAD/4Mb
 github.com/dmarkham/enumer v1.5.11/go.mod h1:yixql+kDDQRYqcuBM2n9Vlt7NoT9ixgXhaXry8vmRg8=
 github.com/g4s8/envdoc v1.5.0 h1:Oa5KhsQSSt0jOjugcCFKn1kLbiST0o5CbqhUETZyQTQ=
 github.com/g4s8/envdoc v1.5.0/go.mod h1:W36cSgyA45ywTCdqU6zkLJdjE2qx4qHtiWwz6dtnEeY=
-github.com/go-chi/chi/v5 v5.2.1 h1:KOIHODQj58PmL80G2Eak4WdvUzjSJSm0vG72crDCqb8=
-github.com/go-chi/chi/v5 v5.2.1/go.mod h1:L2yAIGWB3H+phAw1NxKwWM+7eUH/lU8pOMm5hHcoops=
+github.com/go-chi/chi/v5 v5.2.2 h1:CMwsvRVTbXVytCk1Wd72Zy1LAsAh9GxMmSNWLHCG618=
+github.com/go-chi/chi/v5 v5.2.2/go.mod h1:L2yAIGWB3H+phAw1NxKwWM+7eUH/lU8pOMm5hHcoops=
 github.com/go-chi/httprate v0.15.0 h1:j54xcWV9KGmPf/X4H32/aTH+wBlrvxL7P+SdnRqxh5g=
 github.com/go-chi/httprate v0.15.0/go.mod h1:rzGHhVrsBn3IMLYDOZQsSU4fJNWcjui4fWKJcCId1R4=
 github.com/gobwas/glob v0.2.3 h1:A4xDbljILXROh+kObIiy5kIaPYD8e96x1tgBhUI5J+Y=
