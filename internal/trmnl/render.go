@@ -140,10 +140,15 @@ func drawText(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	draw.Draw(img, nightscout.Bounds().Add(image.Pt(650, 33)), nightscout, image.Point{}, draw.Over)
 
 	// Horizontal separator
+	var horizontalSrc image.Image
+	if conf.ColorMode == config.ColorMode2Bit {
+		horizontalSrc = image.NewUniform(imaging.Gray2)
+	} else {
+		horizontalSrc = imaging.NewDots(image.Pt(4, 0), false)
+	}
 	draw.Draw(img,
 		image.Rect(440, 113, Width-Margin, 114),
-		imaging.NewDots(image.Pt(4, 0), false),
-		image.Point{}, draw.Src,
+		horizontalSrc, image.Point{}, draw.Src,
 	)
 
 	drawSegment(img, image.Pt(440, 125), directionLabel, res.Properties.Bgnow.Arrow())
