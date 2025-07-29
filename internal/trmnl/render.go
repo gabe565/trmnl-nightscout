@@ -174,6 +174,11 @@ func drawSegment(img *image.Paletted, p image.Point, label, value string) {
 }
 
 func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
+	const (
+		plotW = vg.Length(Width-2*Margin) * vg.Inch / DPI
+		plotH = vg.Length(Height/2) * vg.Inch / DPI
+	)
+
 	p := plot.New()
 	p.BackgroundColor = color.Transparent
 
@@ -201,28 +206,15 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	p.X.Tick.Label.Font.Size = 10
 	p.X.Tick.Marker = Ticks(conf)
 
-	// Render numbers and axes to non-dithered layer
-	p.X.Color = color.Transparent
-	p.X.Tick.Color = color.Transparent
-	p.Y.Color = color.Transparent
-	p.Y.Tick.Color = color.Transparent
-
-	plotW := vg.Length(Width-2*Margin) * vg.Inch / DPI
-	plotH := vg.Length(Height/2) * vg.Inch / DPI
-
-	c := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
-	p.Draw(vgdraw.New(c))
-	axisImg := c.Image()
-
-	p.X.Color = color.Black
-	p.X.Tick.Color = color.Black
-	p.Y.Color = color.Black
-	p.Y.Tick.Color = color.Black
-
 	gridLine := vgdraw.LineStyle{
 		Color:  color.Black,
 		Width:  1,
 		Dashes: []vg.Length{1, 5},
+	}
+
+	grid := &plotter.Grid{
+		Vertical:   gridLine,
+		Horizontal: gridLine,
 	}
 
 	thresholdLine := vgdraw.LineStyle{
@@ -231,94 +223,134 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 		Dashes: []vg.Length{4, 2},
 	}
 
-	p.Add(
-		// High threshold background
-		&plotter.Polygon{
-			XYs: []plotter.XYs{{
-				{X: p.X.Min, Y: conf.HighThreshold},
-				{X: p.X.Max, Y: conf.HighThreshold},
-				{X: p.X.Max, Y: p.Y.Max},
-				{X: p.X.Min, Y: p.Y.Max},
-			}},
-			Color: color.Gray{Y: conf.HighBackgroundShade},
+	highLine := &plotter.Line{
+		XYs: plotter.XYs{
+			{X: p.X.Min, Y: conf.HighThreshold},
+			{X: p.X.Max, Y: conf.HighThreshold},
 		},
+		LineStyle: thresholdLine,
+	}
 
-		// Low threshold background
-		&plotter.Polygon{
-			XYs: []plotter.XYs{{
-				{X: p.X.Min, Y: p.Y.Min},
-				{X: p.X.Max, Y: p.Y.Min},
-				{X: p.X.Max, Y: conf.LowThreshold},
-				{X: p.X.Min, Y: conf.LowThreshold},
-			}},
-			Color: color.Gray{Y: conf.LowBackgroundShade},
-		},
+	highBg := &plotter.Polygon{
+		XYs: []plotter.XYs{{
+			{X: p.X.Min, Y: conf.HighThreshold},
+			{X: p.X.Max, Y: conf.HighThreshold},
+			{X: p.X.Max, Y: p.Y.Max},
+			{X: p.X.Min, Y: p.Y.Max},
+		}},
+		Color: color.Gray{Y: conf.HighBackgroundShade},
+	}
 
-		// Grid
-		&plotter.Grid{
-			Vertical:   gridLine,
-			Horizontal: gridLine,
+	// Low threshold
+	lowLine := &plotter.Line{
+		XYs: plotter.XYs{
+			{X: p.X.Min, Y: conf.LowThreshold},
+			{X: p.X.Max, Y: conf.LowThreshold},
 		},
+		LineStyle: thresholdLine,
+	}
 
-		// High threshold
-		&plotter.Line{
-			XYs: plotter.XYs{
-				{X: p.X.Min, Y: conf.HighThreshold},
-				{X: p.X.Max, Y: conf.HighThreshold},
-			},
-			LineStyle: thresholdLine,
-		},
-
-		// Low threshold
-		&plotter.Line{
-			XYs: plotter.XYs{
-				{X: p.X.Min, Y: conf.LowThreshold},
-				{X: p.X.Max, Y: conf.LowThreshold},
-			},
-			LineStyle: thresholdLine,
-		},
-	)
+	lowBg := &plotter.Polygon{
+		XYs: []plotter.XYs{{
+			{X: p.X.Min, Y: p.Y.Min},
+			{X: p.X.Max, Y: p.Y.Min},
+			{X: p.X.Max, Y: conf.LowThreshold},
+			{X: p.X.Min, Y: conf.LowThreshold},
+		}},
+		Color: color.Gray{Y: conf.LowBackgroundShade},
+	}
 
 	// Points
-	points := make(plotter.XYs, 0, len(res.Entries))
+	pointsXY := make(plotter.XYs, 0, len(res.Entries))
 	for _, entry := range res.Entries {
 		if entry.Date.Before(start) {
 			continue
 		}
 		reading := max(float64(conf.GraphMin), min(float64(conf.GraphMax), entry.SGV.Value(conf.Units)))
-		points = append(points, plotter.XY{
+		pointsXY = append(pointsXY, plotter.XY{
 			X: float64(entry.Date.Unix()),
 			Y: reading,
 		})
 	}
 
-	p.Add(&plotter.Scatter{
-		XYs: points,
+	// Points
+	points := &plotter.Scatter{
+		XYs: pointsXY,
 		GlyphStyle: vgdraw.GlyphStyle{
 			Color:  color.Black,
 			Radius: 2,
 			Shape:  vgdraw.CircleGlyph{},
 		},
-	})
+	}
 
-	p.X.Tick.Label.Color = color.Transparent
-	p.Y.Tick.Label.Color = color.Transparent
+	// Render images based on color mode
+	var ditherImg, rawImg image.Image
+	if conf.Enable2BitColor {
+		// Hide elements for the dithered image
+		p.X.Color = color.Transparent
+		p.Y.Color = color.Transparent
+		p.X.Tick.Color = color.Transparent
+		p.Y.Tick.Color = color.Transparent
+		p.X.Tick.Label.Color = color.Transparent
+		p.Y.Tick.Label.Color = color.Transparent
 
-	// Draw dithered plot parts
-	c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI))
-	p.Draw(vgdraw.New(c))
-	plotImg := c.Image()
+		p.Add(highBg, lowBg)
+
+		c := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI))
+		p.Draw(vgdraw.New(c))
+		ditherImg = c.Image()
+
+		// Show elements for the raw image
+		p.X.Color = color.Black
+		p.Y.Color = color.Black
+		p.X.Tick.Color = color.Black
+		p.Y.Tick.Color = color.Black
+		p.X.Tick.Label.Color = color.Black
+		p.Y.Tick.Label.Color = color.Black
+		highBg.XYs = nil
+		lowBg.XYs = nil
+
+		p.Add(grid, highLine, lowLine, points)
+
+		c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
+		p.Draw(vgdraw.New(c))
+		rawImg = c.Image()
+	} else {
+		// Hide elements for raw image
+		p.X.Color = color.Transparent
+		p.Y.Color = color.Transparent
+		p.X.Tick.Color = color.Transparent
+		p.Y.Tick.Color = color.Transparent
+
+		c := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
+		p.Draw(vgdraw.New(c))
+		rawImg = c.Image()
+
+		// Show/hide elements for dithered image
+		p.X.Color = color.Black
+		p.Y.Color = color.Black
+		p.X.Tick.Color = color.Black
+		p.Y.Tick.Color = color.Black
+		p.X.Tick.Label.Color = color.Transparent
+		p.Y.Tick.Label.Color = color.Transparent
+
+		p.Add(highBg, lowBg, grid, highLine, lowLine, points)
+
+		c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI))
+		p.Draw(vgdraw.New(c))
+		ditherImg = c.Image()
+	}
 
 	// Dither
 	d := dither.NewDitherer(conf.GetPalette())
 	d.Matrix = dither.FloydSteinberg
 	d.Serpentine = true
-	d.Dither(plotImg)
+	ditherImg = d.Dither(ditherImg)
 
 	// Combine layers
 	plotBounds := img.Bounds().Add(image.Pt(Margin, Height/2-Margin))
-	draw.Draw(img, plotBounds, plotImg, image.Point{}, draw.Src)
-	draw.Draw(img, plotBounds, axisImg, image.Point{}, draw.Over)
+	draw.Draw(img, plotBounds, ditherImg, image.Point{}, draw.Src)
+	draw.Draw(img, plotBounds, rawImg, image.Point{}, draw.Over)
 }
 
 func Ticks(conf *config.Config) plot.TickerFunc {
