@@ -23,5 +23,5 @@
  - `UPDATE_INTERVAL` (default: `5m`) - The interval that new readings are sent to Nightscout.
  - `FETCH_DELAY` (default: `30s`) - Time to wait before the next reading should be ready. In testing, this seems to be about 20s behind, so the default is 30s to be safe. Your results may vary.
  - `FALLBACK_INTERVAL` (default: `30s`) - Normally, readings will be fetched when ready (after ~5m). This interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
- - `ENABLE_2BIT_COLOR` (default: `true`) - Enables 2-bit color output. Text will be antialiased and dithering will be higher quality. Requires TRMNL firmware v1.6.0+.
+ - `COLOR_MODE` (default: `1bit`) - Output color mode. 2-bit will be antialiased and dithering will be higher quality, but requires TRMNL firmware v1.6.0+. (one of 1bit, 2bit)
 

@@ -143,7 +143,7 @@ func (s *Server) image(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	img, err := trmnl.Render(s.conf, last)
+	img, err := trmnl.Render(s.conf, last, s.conf.ColorMode.Palette())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

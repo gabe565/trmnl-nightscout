@@ -79,13 +79,13 @@ func init() {
 	}))
 }
 
-func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
+func Render(conf *config.Config, res *fetch.Response, palette color.Palette) (image.Image, error) {
 	// Create regular image layer
-	img := image.NewPaletted(image.Rect(0, 0, Width, Height), conf.GetPalette())
+	img := image.NewPaletted(image.Rect(0, 0, Width, Height), palette)
 	draw.Draw(img, img.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
 
 	drawText(conf, res, img)
-	drawPlot(conf, res, img)
+	drawPlot(conf, res, img, palette)
 
 	invert := conf.Invert
 	bgnow := res.Properties.Bgnow.Last.Value(conf.Units)
@@ -173,7 +173,7 @@ func drawSegment(img *image.Paletted, p image.Point, label, value string) {
 	drawer.DrawString(value)
 }
 
-func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
+func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted, palette color.Palette) {
 	const (
 		plotW = vg.Length(Width-2*Margin) * vg.Inch / DPI
 		plotH = vg.Length(Height/2) * vg.Inch / DPI
@@ -285,7 +285,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 
 	// Render images based on color mode
 	var ditherImg, rawImg image.Image
-	if conf.Enable2BitColor {
+	if conf.ColorMode == config.ColorMode2Bit {
 		// Hide elements for the dithered image
 		p.X.Color = color.Transparent
 		p.Y.Color = color.Transparent
@@ -342,7 +342,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	}
 
 	// Dither
-	d := dither.NewDitherer(conf.GetPalette())
+	d := dither.NewDitherer(palette)
 	d.Matrix = dither.FloydSteinberg
 	d.Serpentine = true
 	ditherImg = d.Dither(ditherImg)

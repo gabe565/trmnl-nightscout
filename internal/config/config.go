@@ -1,14 +1,13 @@
 package config
 
 import (
-	"image/color"
 	"time"
 
 	"gabe565.com/trmnl-nightscout/internal/bg"
-	"gabe565.com/trmnl-nightscout/internal/imaging"
 )
 
-//go:generate go tool envdoc -output ../../config.md
+//go:generate go tool envdoc -types Config -output ../../config.md
+
 type Config struct {
 	Version string `toml:"-"`
 
@@ -64,13 +63,6 @@ type Config struct {
 	// Normally, readings will be fetched when ready (after ~5m). This interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
 	FallbackInterval time.Duration `env:"FALLBACK_INTERVAL" envDefault:"30s"`
 
-	// Enables 2-bit color output. Text will be antialiased and dithering will be higher quality. Requires TRMNL firmware v1.6.0+.
-	Enable2BitColor bool `env:"ENABLE_2BIT_COLOR" envDefault:"true"`
-}
-
-func (c *Config) GetPalette() color.Palette {
-	if c.Enable2BitColor {
-		return imaging.Palette2Bit()
-	}
-	return imaging.Palette1Bit()
+	// Output color mode. 2-bit will be antialiased and dithering will be higher quality, but requires TRMNL firmware v1.6.0+. (one of 1bit, 2bit)
+	ColorMode ColorMode `env:"COLOR_MODE" envDefault:"1bit"`
 }
