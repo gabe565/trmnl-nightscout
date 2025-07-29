@@ -14,13 +14,14 @@
  - `GRAPH_MIN` (default: `40`) - Minimum X-axis value.
  - `GRAPH_MAX` (default: `300`) - Maximum X-axis value.
  - `HIGH_THRESHOLD` (default: `200`) - Where to draw the upper line.
- - `HIGH_BACKGROUND_SHADE` (default: `250`) - Background shade above the high threshold line. Value must be between 0-255.
+ - `HIGH_BACKGROUND_SHADE` (default: `245`) - Background shade above the high threshold line. Value must be between 0-255.
  - `LOW_THRESHOLD` (default: `70`) - Where to draw the lower line.
- - `LOW_BACKGROUND_SHADE` (default: `247`) - Background shade below the low threshold line. Value must be between 0-255.
+ - `LOW_BACKGROUND_SHADE` (default: `237`) - Background shade below the low threshold line. Value must be between 0-255.
  - `INVERT` - Render with a black background and a white foreground.
  - `INVERT_BELOW` (default: `55`) - Invert colors when below this value. (Stacks with the `INVERT` option)
  - `INVERT_ABOVE` (default: `300`) - Invert colors when above this value. (Stacks with the `INVERT` option)
  - `UPDATE_INTERVAL` (default: `5m`) - The interval that new readings are sent to Nightscout.
  - `FETCH_DELAY` (default: `30s`) - Time to wait before the next reading should be ready. In testing, this seems to be about 20s behind, so the default is 30s to be safe. Your results may vary.
  - `FALLBACK_INTERVAL` (default: `30s`) - Normally, readings will be fetched when ready (after ~5m). This interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
+ - `ENABLE_2BIT_COLOR` (default: `true`) - Enables 2-bit color output. Text will be antialiased and dithering will be higher quality. Requires TRMNL firmware v1.6.0+.
 

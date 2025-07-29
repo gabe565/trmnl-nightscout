@@ -81,7 +81,7 @@ func init() {
 
 func Render(conf *config.Config, res *fetch.Response) (image.Image, error) {
 	// Create regular image layer
-	img := image.NewPaletted(image.Rect(0, 0, Width, Height), imaging.Palette1Bit())
+	img := image.NewPaletted(image.Rect(0, 0, Width, Height), conf.GetPalette())
 	draw.Draw(img, img.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
 
 	drawText(conf, res, img)
@@ -310,7 +310,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	plotImg := c.Image()
 
 	// Dither
-	d := dither.NewDitherer(imaging.Palette1Bit())
+	d := dither.NewDitherer(conf.GetPalette())
 	d.Matrix = dither.FloydSteinberg
 	d.Serpentine = true
 	d.Dither(plotImg)

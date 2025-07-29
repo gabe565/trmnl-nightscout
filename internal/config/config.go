@@ -1,9 +1,11 @@
 package config
 
 import (
+	"image/color"
 	"time"
 
 	"gabe565.com/trmnl-nightscout/internal/bg"
+	"gabe565.com/trmnl-nightscout/internal/imaging"
 )
 
 //go:generate go tool envdoc -output ../../config.md
@@ -41,12 +43,12 @@ type Config struct {
 	// Where to draw the upper line.
 	HighThreshold float64 `env:"HIGH_THRESHOLD"        envDefault:"200"`
 	// Background shade above the high threshold line. Value must be between 0-255.
-	HighBackgroundShade uint8 `env:"HIGH_BACKGROUND_SHADE" envDefault:"250"`
+	HighBackgroundShade uint8 `env:"HIGH_BACKGROUND_SHADE" envDefault:"245"`
 
 	// Where to draw the lower line.
 	LowThreshold float64 `env:"LOW_THRESHOLD"        envDefault:"70"`
 	// Background shade below the low threshold line. Value must be between 0-255.
-	LowBackgroundShade uint8 `env:"LOW_BACKGROUND_SHADE" envDefault:"247"`
+	LowBackgroundShade uint8 `env:"LOW_BACKGROUND_SHADE" envDefault:"237"`
 
 	// Render with a black background and a white foreground.
 	Invert bool `env:"INVERT"`
@@ -61,4 +63,14 @@ type Config struct {
 	FetchDelay time.Duration `env:"FETCH_DELAY"       envDefault:"30s"`
 	// Normally, readings will be fetched when ready (after ~5m). This interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
 	FallbackInterval time.Duration `env:"FALLBACK_INTERVAL" envDefault:"30s"`
+
+	// Enables 2-bit color output. Text will be antialiased and dithering will be higher quality. Requires TRMNL firmware v1.6.0+.
+	Enable2BitColor bool `env:"ENABLE_2BIT_COLOR" envDefault:"true"`
+}
+
+func (c *Config) GetPalette() color.Palette {
+	if c.Enable2BitColor {
+		return imaging.Palette2Bit()
+	}
+	return imaging.Palette1Bit()
 }
