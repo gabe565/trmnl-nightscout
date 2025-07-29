@@ -29,11 +29,13 @@ func (d *DotImage) SetGap(gap image.Point, stagger bool) *DotImage {
 	return d
 }
 
-func (d *DotImage) SetPalette(palette color.Palette) *DotImage {
-	if len(palette) != 2 {
-		panic("DotImage: palette must have length of 2")
-	}
-	d.palette = palette
+func (d *DotImage) SetForeground(c color.Color) *DotImage {
+	d.palette[0] = c
+	return d
+}
+
+func (d *DotImage) SetBackground(c color.Color) *DotImage {
+	d.palette[1] = c
 	return d
 }
 

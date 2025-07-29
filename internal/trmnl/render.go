@@ -105,10 +105,15 @@ func drawText(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		Src: image.NewUniform(color.Black),
 	}
 
-	dots := imaging.NewDots(image.Pt(3, 1), true)
+	var dots image.Image
+	if conf.ColorMode == config.ColorMode2Bit {
+		dots = imaging.NewDots(image.Pt(1, 1), false).SetForeground(imaging.Gray2)
+	} else {
+		dots = imaging.NewDots(image.Pt(3, 1), true)
+	}
 
 	// Last reading
-	draw.Draw(img, image.Rect(25, 30, 35, 196), dots, image.Pt(0, 1), draw.Src)
+	drawClamp(img, image.Rect(25, 30, 35, 196), dots)
 
 	drawer.Face = light74
 	const readingX, readingY = 49, 149
@@ -131,10 +136,10 @@ func drawText(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	drawer.DrawString("Last reading")
 
 	// Updated
-	drawSegment(img, image.Pt(440, 30), "Updated", res.Properties.Bgnow.Mills.Format(conf.TimeFormat))
+	drawSegment(img, image.Pt(440, 30), dots, "Updated", res.Properties.Bgnow.Mills.Format(conf.TimeFormat))
 
 	// Nightscout logo
-	draw.Draw(img, image.Rect(640, 30, 650, 100), dots, image.Pt(0, 1), draw.Src)
+	drawClamp(img, image.Rect(640, 30, 650, 100), dots)
 
 	nightscout := assets.Nightscout()
 	draw.Draw(img, nightscout.Bounds().Add(image.Pt(650, 33)), nightscout, image.Point{}, draw.Over)
@@ -151,15 +156,20 @@ func drawText(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		horizontalSrc, image.Point{}, draw.Src,
 	)
 
-	drawSegment(img, image.Pt(440, 125), directionLabel, res.Properties.Bgnow.Arrow())
-	drawSegment(img, image.Pt(640, 125), "Delta", res.Properties.Delta.Display(conf.Unit))
+	drawSegment(img, image.Pt(440, 125), dots, directionLabel, res.Properties.Bgnow.Arrow())
+	drawSegment(img, image.Pt(640, 125), dots, "Delta", res.Properties.Delta.Display(conf.Unit))
 }
 
 const directionLabel = "Direction"
 
-func drawSegment(img *image.Paletted, p image.Point, label, value string) {
-	dots := imaging.NewDots(image.Pt(3, 1), true)
-	draw.Draw(img, image.Rect(p.X, p.Y, p.X+10, p.Y+70), dots, image.Pt(0, 1), draw.Src)
+func drawClamp(img *image.Paletted, r image.Rectangle, dots image.Image) {
+	draw.Draw(img, r, dots, image.Pt(0, 1), draw.Src)
+	img.Set(r.Min.X, r.Min.Y+1, color.White)
+	img.Set(r.Min.X, r.Max.Y-1, color.White)
+}
+
+func drawSegment(img *image.Paletted, p image.Point, dots image.Image, label, value string) {
+	drawClamp(img, image.Rect(p.X, p.Y, p.X+10, p.Y+70), dots)
 
 	drawer := &font.Drawer{
 		Dst: img,
