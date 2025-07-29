@@ -1,7 +1,7 @@
 package nightscout
 
 import (
-	"gabe565.com/trmnl-nightscout/internal/config"
+	"gabe565.com/trmnl-nightscout/internal/bg"
 )
 
 type Properties struct {
@@ -10,11 +10,11 @@ type Properties struct {
 	Direction Direction `json:"direction"`
 }
 
-func (p Properties) String(conf *config.Config) string {
-	result := p.Bgnow.DisplayBg(conf.Units) +
+func (p Properties) String(unit bg.Unit) string {
+	result := p.Bgnow.DisplayBg(unit) +
 		" " + p.Bgnow.Arrow()
-	if delta := p.Delta.Display(conf.Units); delta != "" {
-		result += " " + p.Delta.Display(conf.Units)
+	if delta := p.Delta.Display(unit); delta != "" {
+		result += " " + p.Delta.Display(unit)
 	}
 	if rel := p.Bgnow.Mills.Relative(true); rel != "" {
 		result += " [" + p.Bgnow.Mills.Relative(true) + "]"

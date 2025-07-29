@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"gabe565.com/trmnl-nightscout/internal/config"
+	"gabe565.com/trmnl-nightscout/internal/bg"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +17,7 @@ func TestProperties_String(t *testing.T) {
 		Direction Direction
 	}
 	type args struct {
-		conf *config.Config
+		unit bg.Unit
 	}
 	tests := []struct {
 		name   string
@@ -35,7 +35,7 @@ func TestProperties_String(t *testing.T) {
 				},
 				Delta: Delta{Mgdl: 1},
 			},
-			args{&config.Config{}},
+			args{},
 			"100 → +1 [0m]",
 		},
 	}
@@ -46,7 +46,7 @@ func TestProperties_String(t *testing.T) {
 				Bgnow: tt.fields.Bgnow,
 				Delta: tt.fields.Delta,
 			}
-			assert.Equal(t, tt.want, p.String(tt.args.conf))
+			assert.Equal(t, tt.want, p.String(tt.args.unit))
 		})
 	}
 }

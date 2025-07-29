@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"gabe565.com/trmnl-nightscout/internal/bg"
-	"gabe565.com/trmnl-nightscout/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -69,7 +68,7 @@ func TestReading_String(t *testing.T) {
 		Sgvs      []SGV
 	}
 	type args struct {
-		conf *config.Config
+		unit bg.Unit
 	}
 	tests := []struct {
 		name   string
@@ -84,7 +83,7 @@ func TestReading_String(t *testing.T) {
 				Mills: Mills{time.Now()},
 				Sgvs:  []SGV{{Direction: "Flat"}},
 			},
-			args{&config.Config{}},
+			args{},
 			"100 → [0m]",
 		},
 	}
@@ -100,7 +99,7 @@ func TestReading_String(t *testing.T) {
 				ToMills:   tt.fields.ToMills,
 				Sgvs:      tt.fields.Sgvs,
 			}
-			assert.Equal(t, tt.want, r.String(tt.args.conf))
+			assert.Equal(t, tt.want, r.String(tt.args.unit))
 		})
 	}
 }

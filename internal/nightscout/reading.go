@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"gabe565.com/trmnl-nightscout/internal/bg"
-	"gabe565.com/trmnl-nightscout/internal/config"
 )
 
 const (
@@ -53,12 +52,12 @@ func (r *Reading) Arrow() string {
 	}
 }
 
-func (r *Reading) String(conf *config.Config) string {
+func (r *Reading) String(unit bg.Unit) string {
 	if r.Last == 0 {
 		return ""
 	}
 
-	result := r.DisplayBg(conf.Units) +
+	result := r.DisplayBg(unit) +
 		" " + r.Arrow()
 	if rel := r.Mills.Relative(true); rel != "" {
 		result += " [" + r.Mills.Relative(true) + "]"

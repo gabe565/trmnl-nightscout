@@ -165,10 +165,10 @@ func (f *Fetch) fetchEntries(ctx context.Context) ([]nightscout.SGVv1, error) {
 	u.Path = path.Join(u.Path, "/api/v1/entries.json")
 
 	q := u.Query()
-	count := strconv.FormatInt(int64(f.config.GraphDuration/f.config.UpdateInterval), 10)
+	count := strconv.FormatInt(int64(f.config.Render.GraphDuration/f.config.UpdateInterval), 10)
 	q.Set("count", count)
 	u.RawQuery = q.Encode()
-	find := strconv.FormatInt(time.Now().Add(-f.config.GraphDuration).Unix(), 10)
+	find := strconv.FormatInt(time.Now().Add(-f.config.Render.GraphDuration).Unix(), 10)
 	u.RawQuery += "&find[date][$gte]=" + find
 
 	var entries []nightscout.SGVv1

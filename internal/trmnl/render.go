@@ -79,16 +79,16 @@ func init() {
 	}))
 }
 
-func Render(conf *config.Config, res *fetch.Response, palette color.Palette) (image.Image, error) {
+func Render(conf config.Render, res *fetch.Response) (image.Image, error) {
 	// Create regular image layer
-	img := image.NewPaletted(image.Rect(0, 0, Width, Height), palette)
+	img := image.NewPaletted(image.Rect(0, 0, Width, Height), conf.ColorMode.Palette())
 	draw.Draw(img, img.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
 
 	drawText(conf, res, img)
-	drawPlot(conf, res, img, palette)
+	drawPlot(conf, res, img)
 
 	invert := conf.Invert
-	bgnow := res.Properties.Bgnow.Last.Value(conf.Units)
+	bgnow := res.Properties.Bgnow.Last.Value(conf.Unit)
 	if bgnow <= conf.InvertBelow || bgnow >= conf.InvertAbove {
 		invert = !invert
 	}
@@ -99,7 +99,7 @@ func Render(conf *config.Config, res *fetch.Response, palette color.Palette) (im
 	return img, nil
 }
 
-func drawText(conf *config.Config, res *fetch.Response, img *image.Paletted) {
+func drawText(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	drawer := &font.Drawer{
 		Dst: img,
 		Src: image.NewUniform(color.Black),
@@ -113,7 +113,7 @@ func drawText(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	drawer.Face = light74
 	const readingX, readingY = 49, 149
 	drawer.Dot = fixed.P(readingX, readingY)
-	drawer.DrawString(res.Properties.Bgnow.DisplayBg(conf.Units))
+	drawer.DrawString(res.Properties.Bgnow.DisplayBg(conf.Unit))
 
 	if time.Since(res.Properties.Bgnow.Mills.Time) > 15*time.Minute {
 		// Strikethrough
@@ -124,7 +124,7 @@ func drawText(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	}
 
 	drawer.Face = light23
-	drawer.DrawString(" " + conf.Units.String())
+	drawer.DrawString(" " + conf.Unit.String())
 
 	drawer.Face = semiBold11
 	drawer.Dot = fixed.P(45, 179)
@@ -147,7 +147,7 @@ func drawText(conf *config.Config, res *fetch.Response, img *image.Paletted) {
 	)
 
 	drawSegment(img, image.Pt(440, 125), directionLabel, res.Properties.Bgnow.Arrow())
-	drawSegment(img, image.Pt(640, 125), "Delta", res.Properties.Delta.Display(conf.Units))
+	drawSegment(img, image.Pt(640, 125), "Delta", res.Properties.Delta.Display(conf.Unit))
 }
 
 const directionLabel = "Direction"
@@ -173,7 +173,7 @@ func drawSegment(img *image.Paletted, p image.Point, label, value string) {
 	drawer.DrawString(value)
 }
 
-func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted, palette color.Palette) {
+func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	const (
 		plotW = vg.Length(Width-2*Margin) * vg.Inch / DPI
 		plotH = vg.Length(Height/2) * vg.Inch / DPI
@@ -186,7 +186,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted, pal
 	p.Y.Max = float64(conf.GraphMax)
 	p.Y.Padding = 0
 	p.Y.Tick.Label.Font.Size = 10
-	if conf.Units == bg.Mmol {
+	if conf.Unit == bg.Mmol {
 		ticks := make(plot.ConstantTicks, 0, conf.GraphMax-conf.GraphMin+1)
 		for i := conf.GraphMin; i <= conf.GraphMax; i++ {
 			tick := plot.Tick{Value: float64(i)}
@@ -266,7 +266,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted, pal
 		if entry.Date.Before(start) {
 			continue
 		}
-		reading := max(float64(conf.GraphMin), min(float64(conf.GraphMax), entry.SGV.Value(conf.Units)))
+		reading := max(float64(conf.GraphMin), min(float64(conf.GraphMax), entry.SGV.Value(conf.Unit)))
 		pointsXY = append(pointsXY, plotter.XY{
 			X: float64(entry.Date.Unix()),
 			Y: reading,
@@ -342,7 +342,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted, pal
 	}
 
 	// Dither
-	d := dither.NewDitherer(palette)
+	d := dither.NewDitherer(conf.ColorMode.Palette())
 	d.Matrix = dither.FloydSteinberg
 	d.Serpentine = true
 	ditherImg = d.Dither(ditherImg)
@@ -353,7 +353,7 @@ func drawPlot(conf *config.Config, res *fetch.Response, img *image.Paletted, pal
 	draw.Draw(img, plotBounds, rawImg, image.Point{}, draw.Over)
 }
 
-func Ticks(conf *config.Config) plot.TickerFunc {
+func Ticks(conf config.Render) plot.TickerFunc {
 	interval := 15 * time.Minute
 	if conf.GraphDuration > 8*time.Hour {
 		interval = 30 * time.Minute

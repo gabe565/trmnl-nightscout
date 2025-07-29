@@ -113,12 +113,7 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 	}
 
 	u.Path = path.Join(u.Path, "image.png")
-
-	if token := r.URL.Query().Get("token"); token != "" {
-		q := u.Query()
-		q.Set("token", token)
-		u.RawQuery = q.Encode()
-	}
+	u.RawQuery = r.URL.RawQuery
 
 	refreshRate := time.Until(last.Properties.Bgnow.Mills.Time) + s.conf.UpdateInterval + s.conf.FetchDelay
 	refreshRate = max(refreshRate, 60*time.Second)
@@ -143,7 +138,13 @@ func (s *Server) image(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	img, err := trmnl.Render(s.conf, last, s.conf.ColorMode.Palette())
+	renderConf := s.conf.Render
+	if err := renderConf.UnmarshalQuery(r.URL.Query()); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	img, err := trmnl.Render(renderConf, last)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

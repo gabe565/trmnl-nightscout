@@ -7,6 +7,7 @@ require (
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-chi/httprate v0.15.0
+	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/hhsnopek/etag v0.0.0-20171206181245-aea95f647346
 	github.com/makeworld-the-better-one/dither/v2 v2.4.0
 	github.com/stretchr/testify v1.10.0

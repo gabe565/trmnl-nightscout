@@ -2,8 +2,6 @@ package config
 
 import (
 	"time"
-
-	"gabe565.com/trmnl-nightscout/internal/bg"
 )
 
 //go:generate go tool envdoc -types Config -output ../../config.md
@@ -27,35 +25,6 @@ type Config struct {
 	// Get client IP address from the "Real-IP" header.
 	RealIPHeader bool `env:"REAL_IP_HEADER" envDefault:"false"`
 
-	// Blood sugar unit. (one of: mg/dL, mmol/L)
-	Units bg.Unit `env:"NIGHTSCOUT_UNITS"`
-	// Customize the time format. Use `3:04 PM` for 12-hour time or `15:04` for 24-hour. See [time](https://pkg.go.dev/time) for more details.
-	TimeFormat string `env:"TIME_FORMAT"      envDefault:"3:04 PM"`
-
-	// How far back in time the graph should go.
-	GraphDuration time.Duration `env:"GRAPH_DURATION" envDefault:"6h"`
-	// Minimum X-axis value.
-	GraphMin int `env:"GRAPH_MIN"      envDefault:"40"`
-	// Maximum X-axis value.
-	GraphMax int `env:"GRAPH_MAX"      envDefault:"300"`
-
-	// Where to draw the upper line.
-	HighThreshold float64 `env:"HIGH_THRESHOLD"        envDefault:"200"`
-	// Background shade above the high threshold line. Value must be between 0-255.
-	HighBackgroundShade uint8 `env:"HIGH_BACKGROUND_SHADE" envDefault:"245"`
-
-	// Where to draw the lower line.
-	LowThreshold float64 `env:"LOW_THRESHOLD"        envDefault:"70"`
-	// Background shade below the low threshold line. Value must be between 0-255.
-	LowBackgroundShade uint8 `env:"LOW_BACKGROUND_SHADE" envDefault:"237"`
-
-	// Render with a black background and a white foreground.
-	Invert bool `env:"INVERT"`
-	// Invert colors when below this value. (Stacks with the `INVERT` option)
-	InvertBelow float64 `env:"INVERT_BELOW" envDefault:"55"`
-	// Invert colors when above this value. (Stacks with the `INVERT` option)
-	InvertAbove float64 `env:"INVERT_ABOVE" envDefault:"300"`
-
 	// The interval that new readings are sent to Nightscout.
 	UpdateInterval time.Duration `env:"UPDATE_INTERVAL"   envDefault:"5m"`
 	// Time to wait before the next reading should be ready. In testing, this seems to be about 20s behind, so the default is 30s to be safe. Your results may vary.
@@ -63,6 +32,5 @@ type Config struct {
 	// Normally, readings will be fetched when ready (after ~5m). This interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
 	FallbackInterval time.Duration `env:"FALLBACK_INTERVAL" envDefault:"30s"`
 
-	// Output color mode. 2-bit will be antialiased and dithering will be higher quality, but requires TRMNL firmware v1.6.0+. (one of 1bit, 2bit)
-	ColorMode ColorMode `env:"COLOR_MODE" envDefault:"1bit"`
+	Render Render
 }
