@@ -12,7 +12,7 @@ require (
 	github.com/makeworld-the-better-one/dither/v2 v2.4.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/image v0.28.0
-	golang.org/x/sync v0.15.0
+	golang.org/x/sync v0.16.0
 	gonum.org/v1/plot v0.16.0
 )
 
