@@ -299,9 +299,9 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	}
 
 	// Render images based on color mode
-	var ditherImg, rawImg image.Image
+	plotBounds := img.Bounds().Add(image.Pt(Margin, Height/2-Margin))
 	if conf.ColorMode == config.ColorMode2Bit {
-		// Hide elements for the dithered image
+		// Hide elements for the bg image
 		p.X.Color = color.Transparent
 		p.Y.Color = color.Transparent
 		p.X.Tick.Color = color.Transparent
@@ -309,39 +309,55 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		p.X.Tick.Label.Color = color.Transparent
 		p.Y.Tick.Label.Color = color.Transparent
 
-		p.Add(highBg, lowBg)
-
-		c := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI))
+		// Render high bg mask
+		p.Add(highBg)
+		c := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
 		p.Draw(vgdraw.New(c))
-		ditherImg = c.Image()
+		highMask := c.Image()
+		highBg.XYs = nil
 
-		// Show elements for the raw image
+		// Render high bg dots from mask
+		dots := imaging.NewDots(image.Pt(3, 1), true).SetForeground(imaging.Gray2)
+		draw.DrawMask(img, plotBounds, dots, image.Point{}, highMask, image.Point{}, draw.Over)
+
+		// Render low bg mask
+		p.Add(lowBg)
+		c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
+		p.Draw(vgdraw.New(c))
+		lowMask := c.Image()
+		lowBg.XYs = nil
+
+		// Render low bg dots from mask
+		dots.SetGap(image.Pt(3, 1), true).SetForeground(imaging.Gray1)
+		draw.DrawMask(img, plotBounds, dots, image.Point{}, lowMask, image.Point{}, draw.Over)
+
+		// Show elements for the fg image
 		p.X.Color = color.Black
 		p.Y.Color = color.Black
 		p.X.Tick.Color = color.Black
 		p.Y.Tick.Color = color.Black
 		p.X.Tick.Label.Color = color.Black
 		p.Y.Tick.Label.Color = color.Black
-		highBg.XYs = nil
-		lowBg.XYs = nil
 
+		// Render fg image
 		p.Add(grid, highLine, lowLine, points)
-
 		c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
 		p.Draw(vgdraw.New(c))
-		rawImg = c.Image()
+		fgImg := c.Image()
+		draw.Draw(img, plotBounds, fgImg, image.Point{}, draw.Over)
 	} else {
-		// Hide elements for raw image
+		// Hide elements for fg image
 		p.X.Color = color.Transparent
 		p.Y.Color = color.Transparent
 		p.X.Tick.Color = color.Transparent
 		p.Y.Tick.Color = color.Transparent
 
+		// Render fg image
 		c := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
 		p.Draw(vgdraw.New(c))
-		rawImg = c.Image()
+		fgImg := c.Image()
 
-		// Show/hide elements for dithered image
+		// Show/hide elements for dithered bg image
 		p.X.Color = color.Black
 		p.Y.Color = color.Black
 		p.X.Tick.Color = color.Black
@@ -349,23 +365,22 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		p.X.Tick.Label.Color = color.Transparent
 		p.Y.Tick.Label.Color = color.Transparent
 
+		// Render bg image
 		p.Add(highBg, lowBg, grid, highLine, lowLine, points)
-
 		c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI))
 		p.Draw(vgdraw.New(c))
-		ditherImg = c.Image()
+		bgImg := c.Image()
+
+		// Dither
+		d := dither.NewDitherer(conf.ColorMode.Palette())
+		d.Matrix = dither.FloydSteinberg
+		d.Serpentine = true
+		d.Dither(bgImg)
+
+		// Combine layers
+		draw.Draw(img, plotBounds, bgImg, image.Point{}, draw.Src)
+		draw.Draw(img, plotBounds, fgImg, image.Point{}, draw.Over)
 	}
-
-	// Dither
-	d := dither.NewDitherer(conf.ColorMode.Palette())
-	d.Matrix = dither.FloydSteinberg
-	d.Serpentine = true
-	ditherImg = d.Dither(ditherImg)
-
-	// Combine layers
-	plotBounds := img.Bounds().Add(image.Pt(Margin, Height/2-Margin))
-	draw.Draw(img, plotBounds, ditherImg, image.Point{}, draw.Src)
-	draw.Draw(img, plotBounds, rawImg, image.Point{}, draw.Over)
 }
 
 func Ticks(conf config.Render) plot.TickerFunc {
