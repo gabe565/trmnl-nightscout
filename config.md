@@ -17,9 +17,7 @@
  - `GRAPH_MIN` (default: `40`) - Minimum X-axis value.
  - `GRAPH_MAX` (default: `300`) - Maximum X-axis value.
  - `HIGH_THRESHOLD` (default: `200`) - Where to draw the upper line.
- - `HIGH_BG` (default: `245`) - Background shade above the high threshold line. Value must be between 0-255.
  - `LOW_THRESHOLD` (default: `70`) - Where to draw the lower line.
- - `LOW_BG` (default: `237`) - Background shade below the low threshold line. Value must be between 0-255.
  - `INVERT` - Render with a black background and a white foreground.
  - `INVERT_BELOW` (default: `55`) - Invert colors when below this value. (Stacks with the `INVERT` option)
  - `INVERT_ABOVE` (default: `300`) - Invert colors when above this value. (Stacks with the `INVERT` option)

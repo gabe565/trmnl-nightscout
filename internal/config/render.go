@@ -25,13 +25,8 @@ type Render struct {
 
 	// Where to draw the upper line.
 	HighThreshold float64 `env:"HIGH_THRESHOLD" envDefault:"200"`
-	// Background shade above the high threshold line. Value must be between 0-255.
-	HighBackgroundShade uint8 `env:"HIGH_BG"        envDefault:"245"`
-
 	// Where to draw the lower line.
-	LowThreshold float64 `env:"LOW_THRESHOLD" envDefault:"70"`
-	// Background shade below the low threshold line. Value must be between 0-255.
-	LowBackgroundShade uint8 `env:"LOW_BG"        envDefault:"237"`
+	LowThreshold float64 `env:"LOW_THRESHOLD"  envDefault:"70"`
 
 	// Render with a black background and a white foreground.
 	Invert bool `env:"INVERT"`

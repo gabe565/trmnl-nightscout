@@ -256,7 +256,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 			{X: p.X.Max, Y: p.Y.Max},
 			{X: p.X.Min, Y: p.Y.Max},
 		}},
-		Color: color.Gray{Y: conf.HighBackgroundShade},
+		Color: color.Black,
 	}
 
 	// Low threshold
@@ -275,7 +275,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 			{X: p.X.Max, Y: conf.LowThreshold},
 			{X: p.X.Min, Y: conf.LowThreshold},
 		}},
-		Color: color.Gray{Y: conf.LowBackgroundShade},
+		Color: color.Black,
 	}
 
 	// Points
@@ -349,14 +349,28 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		fgImg := c.Image()
 		draw.Draw(img, plotBounds, fgImg, image.Point{}, draw.Over)
 	} else {
-		// Hide elements for fg image
+		// Hide elements for the high/low mask
 		p.X.Color = color.Transparent
 		p.Y.Color = color.Transparent
 		p.X.Tick.Color = color.Transparent
 		p.Y.Tick.Color = color.Transparent
+		p.X.Tick.Label.Color = color.Transparent
+		p.Y.Tick.Label.Color = color.Transparent
+
+		// Render high/low mask
+		p.Add(highBg, lowBg)
+		c := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
+		p.Draw(vgdraw.New(c))
+		bgMask := c.Image()
+		highBg.XYs = nil
+		lowBg.XYs = nil
+
+		// Show labels for the fg image
+		p.X.Tick.Label.Color = color.Black
+		p.Y.Tick.Label.Color = color.Black
 
 		// Render fg image
-		c := vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
+		c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
 		p.Draw(vgdraw.New(c))
 		fgImg := c.Image()
 
@@ -368,13 +382,19 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		p.X.Tick.Label.Color = color.Transparent
 		p.Y.Tick.Label.Color = color.Transparent
 
-		// Render bg image
-		p.Add(highBg, lowBg, grid, highLine, lowLine, points)
+		// Create the bg image
 		c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI))
-		p.Draw(vgdraw.New(c))
 		bgImg := c.Image()
 
-		// Dither
+		// Render the dots from mask
+		dots := imaging.NewDots(image.Pt(3, 1), true)
+		draw.DrawMask(bgImg, bgImg.Bounds(), dots, image.Point{}, bgMask, image.Point{}, draw.Over)
+
+		// Render the plot
+		p.Add(highBg, lowBg, grid, highLine, lowLine, points)
+		p.Draw(vgdraw.New(c))
+
+		// Dither the bg image
 		d := dither.NewDitherer(conf.ColorMode.Palette())
 		d.Matrix = dither.FloydSteinberg
 		d.Serpentine = true
