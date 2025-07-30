@@ -320,7 +320,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		highBg.XYs = nil
 
 		// Render high bg dots from mask
-		dots := imaging.NewDots(image.Pt(3, 1), true).SetForeground(imaging.Gray2)
+		dots := imaging.NewDots(image.Pt(3, 1), true).SetForeground(imaging.Gray1)
 		draw.DrawMask(img, plotBounds, dots, image.Point{}, highMask, image.Point{}, draw.Over)
 
 		// Render low bg mask
@@ -331,7 +331,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		lowBg.XYs = nil
 
 		// Render low bg dots from mask
-		dots.SetGap(image.Pt(3, 1), true).SetForeground(imaging.Gray1)
+		dots.SetGap(image.Pt(1, 0), true).SetForeground(imaging.Gray2)
 		draw.DrawMask(img, plotBounds, dots, image.Point{}, lowMask, image.Point{}, draw.Over)
 
 		// Show elements for the fg image
