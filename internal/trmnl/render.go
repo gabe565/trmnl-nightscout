@@ -80,6 +80,10 @@ func init() {
 }
 
 func Render(conf config.Render, res *fetch.Response) (image.Image, error) {
+	if bgnow := res.Properties.Bgnow.Last.Value(conf.Unit); bgnow <= conf.InvertBelow || bgnow >= conf.InvertAbove {
+		conf.Invert = !conf.Invert
+	}
+
 	// Create regular image layer
 	img := image.NewPaletted(image.Rect(0, 0, Width, Height), conf.ColorMode.Palette())
 	draw.Draw(img, img.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
@@ -87,12 +91,7 @@ func Render(conf config.Render, res *fetch.Response) (image.Image, error) {
 	drawText(conf, res, img)
 	drawPlot(conf, res, img)
 
-	invert := conf.Invert
-	bgnow := res.Properties.Bgnow.Last.Value(conf.Unit)
-	if bgnow <= conf.InvertBelow || bgnow >= conf.InvertAbove {
-		invert = !invert
-	}
-	if invert {
+	if conf.Invert {
 		imaging.InvertPaletted(img)
 	}
 
@@ -107,7 +106,11 @@ func drawText(conf config.Render, res *fetch.Response, img *image.Paletted) {
 
 	var dots image.Image
 	if conf.ColorMode == config.ColorMode2Bit {
-		dots = imaging.NewDots(image.Pt(1, 1), false).SetForeground(imaging.Gray2)
+		c := imaging.Gray2
+		if conf.Invert {
+			c = imaging.Gray1
+		}
+		dots = imaging.NewDots(image.Pt(1, 1), false).SetForeground(c)
 	} else {
 		dots = imaging.NewDots(image.Pt(3, 1), true)
 	}
