@@ -13,6 +13,8 @@ import (
 	"gabe565.com/trmnl-nightscout/internal/util"
 )
 
+//go:generate go run ./internal/generate/docs
+
 var version = "beta"
 
 func main() {

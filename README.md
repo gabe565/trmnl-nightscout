@@ -19,7 +19,7 @@ TRMNL Nightscout fetches blood sugar data from [Nightscout](https://github.com/n
 
 ## Usage
 
-TRMNL Nightscout is configured entirely via environment variables. The most important settings are the Nightscout URL and the public image URL. See [config.md](config.md) for the full list of options. A minimal example:
+TRMNL Nightscout is configured entirely via environment variables. The most important settings are the Nightscout URL and the public image URL. See [`docs/envs.md`](docs/envs.md) for the full list of environment variables. A minimal example:
 
 ```bash
 docker run -d \
@@ -35,3 +35,5 @@ The image endpoint is `/image.png` and does not need to be publicly available. `
 
 Once this app is running, configure the TRMNL Redirect plugin with the Web Address set to your public JSON endpoint. If you opt to set an `ACCESS_TOKEN`, add this to the TRMNL Redirect URL as a `token` query parameter.  
 For example, you could set the TRMNL Web Address to `https://my-trmnl-nightscout.example.com/?token=my-token`.
+
+See [`docs/query-params.md`](docs/query-params.md) for the full list of query parameters.

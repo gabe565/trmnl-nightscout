@@ -4,8 +4,9 @@ import (
 	"time"
 )
 
-//go:generate go tool envdoc -types Config -output ../../config.md
+//go:generate go tool envdoc -types Config -output ../../docs/envs.md
 
+// Config is the base configuration. Note that many of these envs can be overridden per-request using [query parameters](query-params.md).
 type Config struct {
 	Version string `toml:"-"`
 
