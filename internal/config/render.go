@@ -7,6 +7,7 @@ import (
 
 	"gabe565.com/trmnl-nightscout/internal/bg"
 	"github.com/go-viper/mapstructure/v2"
+	"gonum.org/v1/plot/vg"
 )
 
 type Render struct {
@@ -22,6 +23,9 @@ type Render struct {
 	GraphMin int `env:"GRAPH_MIN"      envDefault:"40"`
 	// Maximum X-axis value.
 	GraphMax int `env:"GRAPH_MAX"      envDefault:"300"`
+
+	// Control the plot point stroke radius. Set to 0 to disable.
+	PointStrokeRadius vg.Length `env:"POINT_STROKE_RADIUS" envDefault:"4"`
 
 	// Where to draw the upper line.
 	HighThreshold float64 `env:"HIGH_THRESHOLD" envDefault:"200"`

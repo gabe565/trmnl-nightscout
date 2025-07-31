@@ -292,6 +292,14 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	}
 
 	// Points
+	pointStroke := &plotter.Scatter{
+		XYs: pointsXY,
+		GlyphStyle: vgdraw.GlyphStyle{
+			Color:  color.White,
+			Radius: conf.PointStrokeRadius,
+			Shape:  vgdraw.CircleGlyph{},
+		},
+	}
 	points := &plotter.Scatter{
 		XYs: pointsXY,
 		GlyphStyle: vgdraw.GlyphStyle{
@@ -343,7 +351,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		p.Y.Tick.Label.Color = color.Black
 
 		// Render fg image
-		p.Add(grid, highLine, lowLine, points)
+		p.Add(grid, highLine, lowLine, pointStroke, points)
 		c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
 		p.Draw(vgdraw.New(c))
 		fgImg := c.Image()
@@ -391,7 +399,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		draw.DrawMask(bgImg, bgImg.Bounds(), dots, image.Point{}, bgMask, image.Point{}, draw.Over)
 
 		// Render the plot
-		p.Add(highBg, lowBg, grid, highLine, lowLine, points)
+		p.Add(highBg, lowBg, grid, highLine, lowLine, pointStroke, points)
 		p.Draw(vgdraw.New(c))
 
 		// Dither the bg image
