@@ -80,7 +80,7 @@ func init() {
 }
 
 func Render(conf config.Render, res *fetch.Response) (image.Image, error) {
-	if bgnow := res.Properties.Bgnow.Last.Value(conf.Unit); bgnow <= conf.InvertBelow || bgnow >= conf.InvertAbove {
+	if bgnow := res.Properties.Bgnow.Last; bgnow <= conf.InvertBelow || bgnow >= conf.InvertAbove {
 		conf.Invert = !conf.Invert
 	}
 
@@ -200,13 +200,13 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	p := plot.New()
 	p.BackgroundColor = color.Transparent
 
-	p.Y.Min = float64(conf.GraphMin)
-	p.Y.Max = float64(conf.GraphMax)
+	p.Y.Min = conf.GraphMin.Value(conf.Unit)
+	p.Y.Max = conf.GraphMax.Value(conf.Unit)
 	p.Y.Padding = 0
 	p.Y.Tick.Label.Font.Size = 10
 	if conf.Unit == bg.Mmol {
-		ticks := make(plot.ConstantTicks, 0, conf.GraphMax-conf.GraphMin+1)
-		for i := conf.GraphMin; i <= conf.GraphMax; i++ {
+		ticks := make(plot.ConstantTicks, 0, int(conf.GraphMax.Value(conf.Unit))-int(conf.GraphMin.Value(conf.Unit))+1)
+		for i := int(conf.GraphMin.Value(conf.Unit)); i <= int(conf.GraphMax.Value(conf.Unit)); i++ {
 			tick := plot.Tick{Value: float64(i)}
 			if i%2 == 0 {
 				tick.Label = strconv.Itoa(i)
@@ -243,16 +243,16 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 
 	highLine := &plotter.Line{
 		XYs: plotter.XYs{
-			{X: p.X.Min, Y: conf.HighThreshold},
-			{X: p.X.Max, Y: conf.HighThreshold},
+			{X: p.X.Min, Y: conf.HighThreshold.Value(conf.Unit)},
+			{X: p.X.Max, Y: conf.HighThreshold.Value(conf.Unit)},
 		},
 		LineStyle: thresholdLine,
 	}
 
 	highBg := &plotter.Polygon{
 		XYs: []plotter.XYs{{
-			{X: p.X.Min, Y: conf.HighThreshold},
-			{X: p.X.Max, Y: conf.HighThreshold},
+			{X: p.X.Min, Y: conf.HighThreshold.Value(conf.Unit)},
+			{X: p.X.Max, Y: conf.HighThreshold.Value(conf.Unit)},
 			{X: p.X.Max, Y: p.Y.Max},
 			{X: p.X.Min, Y: p.Y.Max},
 		}},
@@ -262,8 +262,8 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	// Low threshold
 	lowLine := &plotter.Line{
 		XYs: plotter.XYs{
-			{X: p.X.Min, Y: conf.LowThreshold},
-			{X: p.X.Max, Y: conf.LowThreshold},
+			{X: p.X.Min, Y: conf.LowThreshold.Value(conf.Unit)},
+			{X: p.X.Max, Y: conf.LowThreshold.Value(conf.Unit)},
 		},
 		LineStyle: thresholdLine,
 	}
@@ -272,8 +272,8 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		XYs: []plotter.XYs{{
 			{X: p.X.Min, Y: p.Y.Min},
 			{X: p.X.Max, Y: p.Y.Min},
-			{X: p.X.Max, Y: conf.LowThreshold},
-			{X: p.X.Min, Y: conf.LowThreshold},
+			{X: p.X.Max, Y: conf.LowThreshold.Value(conf.Unit)},
+			{X: p.X.Min, Y: conf.LowThreshold.Value(conf.Unit)},
 		}},
 		Color: color.Black,
 	}
@@ -284,7 +284,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		if entry.Date.Before(start) {
 			continue
 		}
-		reading := max(float64(conf.GraphMin), min(float64(conf.GraphMax), entry.SGV.Value(conf.Unit)))
+		reading := max(conf.GraphMin.Value(conf.Unit), min(conf.GraphMax.Value(conf.Unit), entry.SGV.Value(conf.Unit)))
 		pointsXY = append(pointsXY, plotter.XY{
 			X: float64(entry.Date.Unix()),
 			Y: reading,

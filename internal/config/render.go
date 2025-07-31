@@ -20,24 +20,24 @@ type Render struct {
 	// How far back in time the graph should go.
 	GraphDuration time.Duration `env:"GRAPH_DURATION" envDefault:"6h"`
 	// Minimum X-axis value.
-	GraphMin int `env:"GRAPH_MIN"      envDefault:"40"`
+	GraphMin bg.BG `env:"GRAPH_MIN"      envDefault:"40"`
 	// Maximum X-axis value.
-	GraphMax int `env:"GRAPH_MAX"      envDefault:"300"`
+	GraphMax bg.BG `env:"GRAPH_MAX"      envDefault:"300"`
 
 	// Control the plot point stroke radius. Set to 0 to disable.
 	PointStrokeRadius vg.Length `env:"POINT_STROKE_RADIUS" envDefault:"4"`
 
 	// Where to draw the upper line.
-	HighThreshold float64 `env:"HIGH_THRESHOLD" envDefault:"200"`
+	HighThreshold bg.BG `env:"HIGH_THRESHOLD" envDefault:"200"`
 	// Where to draw the lower line.
-	LowThreshold float64 `env:"LOW_THRESHOLD"  envDefault:"70"`
+	LowThreshold bg.BG `env:"LOW_THRESHOLD"  envDefault:"70"`
 
 	// Render with a black background and a white foreground.
 	Invert bool `env:"INVERT"`
 	// Invert colors when below this value. (Stacks with the `INVERT` option)
-	InvertBelow float64 `env:"INVERT_BELOW" envDefault:"55"`
+	InvertBelow bg.BG `env:"INVERT_BELOW" envDefault:"55"`
 	// Invert colors when above this value. (Stacks with the `INVERT` option)
-	InvertAbove float64 `env:"INVERT_ABOVE" envDefault:"300"`
+	InvertAbove bg.BG `env:"INVERT_ABOVE" envDefault:"300"`
 
 	// Output color mode. 2-bit will be antialiased and dithering will be higher quality, but requires TRMNL firmware v1.6.0+. (one of 1bit, 2bit)
 	ColorMode ColorMode `env:"COLOR_MODE" envDefault:"1bit"`
@@ -68,23 +68,31 @@ func (r *Render) UnmarshalQuery(q url.Values) error {
 	}
 
 	if r.Unit == bg.Mmol {
-		if r.HighThreshold > 39 {
-			r.HighThreshold = bg.BG(r.HighThreshold).Mmol()
+		if r.HighThreshold == 200 {
+			r.HighThreshold = bg.NewMmol(11)
+		} else if r.HighThreshold < 30 {
+			r.HighThreshold = bg.NewMmol(r.HighThreshold)
 		}
-		if r.LowThreshold > 39 {
-			r.LowThreshold = bg.BG(r.LowThreshold).Mmol()
+		if r.LowThreshold == 70 {
+			r.LowThreshold = bg.NewMmol(4)
+		} else if r.LowThreshold < 30 {
+			r.LowThreshold = bg.NewMmol(r.LowThreshold)
 		}
-		if r.InvertAbove > 39 {
-			r.InvertAbove = bg.BG(r.InvertAbove).Mmol()
+		if r.InvertAbove < 30 {
+			r.InvertAbove = bg.NewMmol(r.InvertAbove)
 		}
-		if r.InvertBelow > 39 {
-			r.InvertBelow = bg.BG(r.InvertBelow).Mmol()
+		if r.InvertBelow < 30 {
+			r.InvertBelow = bg.NewMmol(r.InvertBelow)
 		}
-		if r.GraphMin > 39 {
-			r.GraphMin = 2
+		if r.GraphMin == 40 {
+			r.GraphMin = bg.NewMmol(2)
+		} else if r.GraphMin < 30 {
+			r.GraphMin = bg.NewMmol(r.GraphMin)
 		}
-		if r.GraphMax > 39 {
-			r.GraphMax = 16
+		if r.GraphMax == 300 {
+			r.GraphMax = bg.NewMmol(16)
+		} else if r.GraphMax < 30 {
+			r.GraphMax = bg.NewMmol(r.GraphMax)
 		}
 	}
 
