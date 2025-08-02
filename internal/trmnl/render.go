@@ -225,20 +225,29 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	p.X.Tick.Marker = Ticks(conf)
 
 	gridLine := vgdraw.LineStyle{
-		Color:  color.Black,
-		Width:  1,
-		Dashes: []vg.Length{1, 5},
+		Color: imaging.Gray2,
+		Width: 1.2,
+	}
+	thresholdLine := vgdraw.LineStyle{
+		Color: imaging.Gray1,
+		Width: 1.2,
+	}
+
+	if conf.ColorMode == config.ColorMode1Bit {
+		gridLine = vgdraw.LineStyle{
+			Color:  color.Black,
+			Width:  1,
+			Dashes: []vg.Length{1, 4},
+		}
+		thresholdLine = vgdraw.LineStyle{
+			Color: color.Black,
+			Width: 1,
+		}
 	}
 
 	grid := &plotter.Grid{
 		Vertical:   gridLine,
 		Horizontal: gridLine,
-	}
-
-	thresholdLine := vgdraw.LineStyle{
-		Color:  color.Black,
-		Width:  1,
-		Dashes: []vg.Length{4, 2},
 	}
 
 	highLine := &plotter.Line{
