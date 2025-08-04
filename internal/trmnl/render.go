@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"image/draw"
 	"strconv"
+	"sync"
 	"time"
 
 	"gabe565.com/trmnl-nightscout/assets"
@@ -12,13 +13,10 @@ import (
 	"gabe565.com/trmnl-nightscout/internal/config"
 	"gabe565.com/trmnl-nightscout/internal/fetch"
 	"gabe565.com/trmnl-nightscout/internal/imaging"
-	"gabe565.com/utils/must"
 	"github.com/makeworld-the-better-one/dither/v2"
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
 	"golang.org/x/image/math/fixed"
 	"gonum.org/v1/plot"
-	plotfont "gonum.org/v1/plot/font"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
 	vgdraw "gonum.org/v1/plot/vg/draw"
@@ -32,82 +30,54 @@ const (
 	Margin = 25
 )
 
-//nolint:gochecknoglobals
-var (
-	light23     font.Face
-	light74     font.Face
-	regular23   font.Face
-	semiBold11  font.Face
-	openArrow23 font.Face
-)
-
-//nolint:gochecknoinits
-func init() {
-	light := must.Must2(opentype.Parse(assets.InterLight))
-	light23 = must.Must2(opentype.NewFace(light, &opentype.FaceOptions{
-		Size: 23,
-		DPI:  DPI,
-	}))
-	light74 = must.Must2(opentype.NewFace(light, &opentype.FaceOptions{
-		Size: 74,
-		DPI:  DPI,
-	}))
-
-	regular := must.Must2(opentype.Parse(assets.InterRegular))
-	regular23 = must.Must2(opentype.NewFace(regular, &opentype.FaceOptions{
-		Size: 23,
-		DPI:  DPI,
-	}))
-
-	semiBold := must.Must2(opentype.Parse(assets.InterSemiBold))
-	semiBold11 = must.Must2(opentype.NewFace(semiBold, &opentype.FaceOptions{
-		Size: 11,
-		DPI:  DPI,
-	}))
-
-	plotFont := plotfont.Font{Typeface: "Inter-SemiBold"}
-	plotfont.DefaultCache.Add(plotfont.Collection{
-		{Font: plotFont, Face: semiBold},
-	})
-	plot.DefaultFont = plotFont
-	plotter.DefaultFont = plotFont
-
-	openArrow := must.Must2(opentype.Parse(assets.OpenArrow))
-	openArrow23 = must.Must2(opentype.NewFace(openArrow, &opentype.FaceOptions{
-		Size: 20,
-		DPI:  DPI,
-	}))
+func NewRenderer(conf config.Render, res *fetch.Response) *Renderer {
+	return &Renderer{conf: conf, res: res}
 }
 
-func Render(conf config.Render, res *fetch.Response) (image.Image, error) {
-	if bgnow := res.Properties.Bgnow.Last; bgnow <= conf.InvertBelow || bgnow >= conf.InvertAbove {
-		conf.Invert = !conf.Invert
-	}
-
-	// Create regular image layer
-	img := image.NewPaletted(image.Rect(0, 0, Width, Height), conf.ColorMode.Palette())
-	draw.Draw(img, img.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
-
-	drawText(conf, res, img)
-	drawPlot(conf, res, img)
-
-	if conf.Invert {
-		imaging.InvertPaletted(img)
-	}
-
-	return img, nil
+type Renderer struct {
+	conf config.Render
+	res  *fetch.Response
+	img  *image.Paletted
+	mu   sync.Mutex
 }
 
-func drawText(conf config.Render, res *fetch.Response, img *image.Paletted) {
+func (r *Renderer) Render() (image.Image, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if r.img != nil {
+		return r.img, nil
+	}
+
+	r.img = image.NewPaletted(image.Rect(0, 0, Width, Height), r.conf.ColorMode.Palette())
+	draw.Draw(r.img, r.img.Bounds(), image.NewUniform(color.White), image.Point{}, draw.Src)
+
+	if bgnow := r.res.Properties.Bgnow.Last; bgnow <= r.conf.InvertBelow || bgnow >= r.conf.InvertAbove {
+		r.conf.Invert = !r.conf.Invert
+	}
+
+	r.drawText()
+	r.drawPlot()
+
+	if r.conf.Invert {
+		imaging.InvertPaletted(r.img)
+	}
+
+	return r.img, nil
+}
+
+func (r *Renderer) drawText() {
+	fonts := newFonts()
+
 	drawer := &font.Drawer{
-		Dst: img,
+		Dst: r.img,
 		Src: image.NewUniform(color.Black),
 	}
 
 	var dots image.Image
-	if conf.ColorMode == config.ColorMode2Bit {
+	if r.conf.ColorMode == config.ColorMode2Bit {
 		c := imaging.Gray2
-		if conf.Invert {
+		if r.conf.Invert {
 			c = imaging.Gray1
 		}
 		dots = imaging.NewDots(image.Pt(1, 1), false).SetForeground(c)
@@ -116,82 +86,83 @@ func drawText(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	}
 
 	// Last reading
-	drawClamp(img, image.Rect(25, 30, 35, 196), dots)
+	r.drawClamp(image.Rect(25, 30, 35, 196), dots)
 
-	drawer.Face = light74
+	drawer.Face = fonts.Reading
 	const readingX, readingY = 49, 149
 	drawer.Dot = fixed.P(readingX, readingY)
-	drawer.DrawString(res.Properties.Bgnow.DisplayBg(conf.Unit))
+	drawer.DrawString(r.res.Properties.Bgnow.DisplayBg(r.conf.Unit))
 
-	if time.Since(res.Properties.Bgnow.Mills.Time) > 15*time.Minute {
+	if time.Since(r.res.Properties.Bgnow.Mills.Time) > 15*time.Minute {
 		// Strikethrough
 		const thickness = 7
-		y := readingY - int(float64(light74.Metrics().XHeight)/64/2) - thickness/2
+		y := readingY - int(float64(fonts.Reading.Metrics().XHeight)/64/2) - thickness/2
 		rect := image.Rect(readingX, y, int(drawer.Dot.X/64), y+thickness)
-		draw.Draw(img, rect, image.NewUniform(color.Black), image.Point{}, draw.Over)
+		draw.Draw(r.img, rect, image.NewUniform(color.Black), image.Point{}, draw.Over)
 	}
 
-	drawer.Face = light23
-	drawer.DrawString(" " + conf.Unit.String())
+	drawer.Face = fonts.Unit
+	drawer.DrawString(" " + r.conf.Unit.String())
 
-	drawer.Face = semiBold11
+	drawer.Face = fonts.Label
 	drawer.Dot = fixed.P(45, 179)
 	drawer.DrawString("Last reading")
 
 	// Updated
-	drawSegment(img, image.Pt(440, 30), dots, "Updated", res.Properties.Bgnow.Mills.Format(conf.TimeFormat))
+	r.drawSegment(fonts.Label, fonts.Info, image.Pt(440, 30), dots, "Updated",
+		r.res.Properties.Bgnow.Mills.Format(r.conf.TimeFormat),
+	)
 
 	// Nightscout logo
-	drawClamp(img, image.Rect(640, 30, 650, 100), dots)
+	r.drawClamp(image.Rect(640, 30, 650, 100), dots)
 
 	nightscout := assets.Nightscout()
-	draw.Draw(img, nightscout.Bounds().Add(image.Pt(650, 33)), nightscout, image.Point{}, draw.Over)
+	draw.Draw(r.img, nightscout.Bounds().Add(image.Pt(650, 33)), nightscout, image.Point{}, draw.Over)
 
 	// Horizontal separator
 	var horizontalSrc image.Image
-	if conf.ColorMode == config.ColorMode2Bit {
+	if r.conf.ColorMode == config.ColorMode2Bit {
 		horizontalSrc = image.NewUniform(imaging.Gray2)
 	} else {
 		horizontalSrc = imaging.NewDots(image.Pt(4, 0), false)
 	}
-	draw.Draw(img,
+	draw.Draw(r.img,
 		image.Rect(440, 113, Width-Margin, 114),
 		horizontalSrc, image.Point{}, draw.Src,
 	)
 
-	drawSegment(img, image.Pt(440, 125), dots, directionLabel, res.Properties.Bgnow.Arrow())
-	drawSegment(img, image.Pt(640, 125), dots, "Delta", res.Properties.Delta.Display(conf.Unit))
+	r.drawSegment(fonts.Label, fonts.Arrow, image.Pt(440, 125), dots, directionLabel, r.res.Properties.Bgnow.Arrow())
+	r.drawSegment(fonts.Label, fonts.Info, image.Pt(640, 125), dots, "Delta",
+		r.res.Properties.Delta.Display(r.conf.Unit),
+	)
 }
 
 const directionLabel = "Direction"
 
-func drawClamp(img *image.Paletted, r image.Rectangle, dots image.Image) {
-	draw.Draw(img, r, dots, image.Pt(0, 1), draw.Src)
-	img.Set(r.Min.X, r.Min.Y+1, color.White)
-	img.Set(r.Min.X, r.Max.Y-1, color.White)
+func (r *Renderer) drawClamp(rect image.Rectangle, dots image.Image) {
+	draw.Draw(r.img, rect, dots, image.Pt(0, 1), draw.Src)
+	r.img.Set(rect.Min.X, rect.Min.Y+1, color.White)
+	r.img.Set(rect.Min.X, rect.Max.Y-1, color.White)
 }
 
-func drawSegment(img *image.Paletted, p image.Point, dots image.Image, label, value string) {
-	drawClamp(img, image.Rect(p.X, p.Y, p.X+10, p.Y+70), dots)
+func (r *Renderer) drawSegment(labelFace, infoFace font.Face, p image.Point, dots image.Image, label, value string) {
+	r.drawClamp(image.Rect(p.X, p.Y, p.X+10, p.Y+70), dots)
 
 	drawer := &font.Drawer{
-		Dst: img,
+		Dst: r.img,
 		Src: image.NewUniform(color.Black),
 	}
 
-	drawer.Face = semiBold11
+	drawer.Face = labelFace
 	drawer.Dot = fixed.P(p.X+20, p.Y+61)
 	drawer.DrawString(label)
 
-	drawer.Face = regular23
-	if label == directionLabel {
-		drawer.Face = openArrow23
-	}
+	drawer.Face = infoFace
 	drawer.Dot = fixed.P(p.X+20, p.Y+38)
 	drawer.DrawString(value)
 }
 
-func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
+func (r *Renderer) drawPlot() {
 	const (
 		plotW = vg.Length(Width-2*Margin) * vg.Inch / DPI
 		plotH = vg.Length(Height/2) * vg.Inch / DPI
@@ -200,13 +171,15 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	p := plot.New()
 	p.BackgroundColor = color.Transparent
 
-	p.Y.Min = conf.GraphMin.Value(conf.Unit)
-	p.Y.Max = conf.GraphMax.Value(conf.Unit)
+	p.Y.Min = r.conf.GraphMin.Value(r.conf.Unit)
+	p.Y.Max = r.conf.GraphMax.Value(r.conf.Unit)
 	p.Y.Padding = 0
 	p.Y.Tick.Label.Font.Size = 10
-	if conf.Unit == bg.Mmol {
-		ticks := make(plot.ConstantTicks, 0, int(conf.GraphMax.Value(conf.Unit))-int(conf.GraphMin.Value(conf.Unit))+1)
-		for i := int(conf.GraphMin.Value(conf.Unit)); i <= int(conf.GraphMax.Value(conf.Unit)); i++ {
+	if r.conf.Unit == bg.Mmol {
+		ticks := make(plot.ConstantTicks, 0,
+			int(r.conf.GraphMax.Value(r.conf.Unit))-int(r.conf.GraphMin.Value(r.conf.Unit))+1,
+		)
+		for i := int(r.conf.GraphMin.Value(r.conf.Unit)); i <= int(r.conf.GraphMax.Value(r.conf.Unit)); i++ {
 			tick := plot.Tick{Value: float64(i)}
 			if i%2 == 0 {
 				tick.Label = strconv.Itoa(i)
@@ -217,12 +190,12 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	}
 
 	end := time.Now()
-	start := end.Add(-conf.GraphDuration)
+	start := end.Add(-r.conf.GraphDuration)
 	p.X.Min = float64(start.Unix())
 	p.X.Max = float64(end.Unix())
 	p.X.Padding = 0
 	p.X.Tick.Label.Font.Size = 10
-	p.X.Tick.Marker = Ticks(conf)
+	p.X.Tick.Marker = Ticks(r.conf)
 
 	gridLine := vgdraw.LineStyle{
 		Color: imaging.Gray2,
@@ -233,7 +206,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		Width: 1.2,
 	}
 
-	if conf.ColorMode == config.ColorMode1Bit {
+	if r.conf.ColorMode == config.ColorMode1Bit {
 		gridLine = vgdraw.LineStyle{
 			Color:  color.Black,
 			Width:  1,
@@ -252,16 +225,16 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 
 	highLine := &plotter.Line{
 		XYs: plotter.XYs{
-			{X: p.X.Min, Y: conf.HighThreshold.Value(conf.Unit)},
-			{X: p.X.Max, Y: conf.HighThreshold.Value(conf.Unit)},
+			{X: p.X.Min, Y: r.conf.HighThreshold.Value(r.conf.Unit)},
+			{X: p.X.Max, Y: r.conf.HighThreshold.Value(r.conf.Unit)},
 		},
 		LineStyle: thresholdLine,
 	}
 
 	highBg := &plotter.Polygon{
 		XYs: []plotter.XYs{{
-			{X: p.X.Min, Y: conf.HighThreshold.Value(conf.Unit)},
-			{X: p.X.Max, Y: conf.HighThreshold.Value(conf.Unit)},
+			{X: p.X.Min, Y: r.conf.HighThreshold.Value(r.conf.Unit)},
+			{X: p.X.Max, Y: r.conf.HighThreshold.Value(r.conf.Unit)},
 			{X: p.X.Max, Y: p.Y.Max},
 			{X: p.X.Min, Y: p.Y.Max},
 		}},
@@ -271,8 +244,8 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	// Low threshold
 	lowLine := &plotter.Line{
 		XYs: plotter.XYs{
-			{X: p.X.Min, Y: conf.LowThreshold.Value(conf.Unit)},
-			{X: p.X.Max, Y: conf.LowThreshold.Value(conf.Unit)},
+			{X: p.X.Min, Y: r.conf.LowThreshold.Value(r.conf.Unit)},
+			{X: p.X.Max, Y: r.conf.LowThreshold.Value(r.conf.Unit)},
 		},
 		LineStyle: thresholdLine,
 	}
@@ -281,19 +254,21 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		XYs: []plotter.XYs{{
 			{X: p.X.Min, Y: p.Y.Min},
 			{X: p.X.Max, Y: p.Y.Min},
-			{X: p.X.Max, Y: conf.LowThreshold.Value(conf.Unit)},
-			{X: p.X.Min, Y: conf.LowThreshold.Value(conf.Unit)},
+			{X: p.X.Max, Y: r.conf.LowThreshold.Value(r.conf.Unit)},
+			{X: p.X.Min, Y: r.conf.LowThreshold.Value(r.conf.Unit)},
 		}},
 		Color: color.Black,
 	}
 
 	// Points
-	pointsXY := make(plotter.XYs, 0, len(res.Entries))
-	for _, entry := range res.Entries {
+	pointsXY := make(plotter.XYs, 0, len(r.res.Entries))
+	for _, entry := range r.res.Entries {
 		if entry.Date.Before(start) || entry.Date.After(end) {
 			continue
 		}
-		reading := max(conf.GraphMin.Value(conf.Unit), min(conf.GraphMax.Value(conf.Unit), entry.SGV.Value(conf.Unit)))
+		reading := entry.SGV.Value(r.conf.Unit)
+		reading = min(reading, r.conf.GraphMax.Value(r.conf.Unit))
+		reading = max(reading, r.conf.GraphMin.Value(r.conf.Unit))
 		pointsXY = append(pointsXY, plotter.XY{
 			X: float64(entry.Date.Unix()),
 			Y: reading,
@@ -305,7 +280,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		XYs: pointsXY,
 		GlyphStyle: vgdraw.GlyphStyle{
 			Color:  color.White,
-			Radius: conf.PointStrokeRadius,
+			Radius: r.conf.PointStrokeRadius,
 			Shape:  vgdraw.CircleGlyph{},
 		},
 	}
@@ -319,8 +294,8 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 	}
 
 	// Render images based on color mode
-	plotBounds := img.Bounds().Add(image.Pt(Margin, Height/2-Margin))
-	if conf.ColorMode == config.ColorMode2Bit {
+	plotBounds := r.img.Bounds().Add(image.Pt(Margin, Height/2-Margin))
+	if r.conf.ColorMode == config.ColorMode2Bit {
 		// Hide elements for the bg image
 		p.X.Color = color.Transparent
 		p.Y.Color = color.Transparent
@@ -338,7 +313,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 
 		// Render high bg dots from mask
 		dots := imaging.NewDots(image.Pt(3, 1), true).SetForeground(imaging.Gray1)
-		draw.DrawMask(img, plotBounds, dots, image.Point{}, highMask, image.Point{}, draw.Over)
+		draw.DrawMask(r.img, plotBounds, dots, image.Point{}, highMask, image.Point{}, draw.Over)
 
 		// Render low bg mask
 		p.Add(lowBg)
@@ -349,7 +324,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 
 		// Render low bg dots from mask
 		dots.SetGap(image.Pt(1, 0), true).SetForeground(imaging.Gray2)
-		draw.DrawMask(img, plotBounds, dots, image.Point{}, lowMask, image.Point{}, draw.Over)
+		draw.DrawMask(r.img, plotBounds, dots, image.Point{}, lowMask, image.Point{}, draw.Over)
 
 		// Show elements for the fg image
 		p.X.Color = color.Black
@@ -364,7 +339,7 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		c = vgimg.NewWith(vgimg.UseWH(plotW, plotH), vgimg.UseDPI(DPI), vgimg.UseBackgroundColor(color.Transparent))
 		p.Draw(vgdraw.New(c))
 		fgImg := c.Image()
-		draw.Draw(img, plotBounds, fgImg, image.Point{}, draw.Over)
+		draw.Draw(r.img, plotBounds, fgImg, image.Point{}, draw.Over)
 	} else {
 		// Hide elements for the high/low mask
 		p.X.Color = color.Transparent
@@ -412,14 +387,14 @@ func drawPlot(conf config.Render, res *fetch.Response, img *image.Paletted) {
 		p.Draw(vgdraw.New(c))
 
 		// Dither the bg image
-		d := dither.NewDitherer(conf.ColorMode.Palette())
+		d := dither.NewDitherer(r.conf.ColorMode.Palette())
 		d.Matrix = dither.FloydSteinberg
 		d.Serpentine = true
 		d.Dither(bgImg)
 
 		// Combine layers
-		draw.Draw(img, plotBounds, bgImg, image.Point{}, draw.Src)
-		draw.Draw(img, plotBounds, fgImg, image.Point{}, draw.Over)
+		draw.Draw(r.img, plotBounds, bgImg, image.Point{}, draw.Src)
+		draw.Draw(r.img, plotBounds, fgImg, image.Point{}, draw.Over)
 	}
 }
 

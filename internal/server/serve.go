@@ -143,7 +143,7 @@ func (s *Server) image(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	img, err := trmnl.Render(renderConf, last)
+	img, err := trmnl.NewRenderer(renderConf, last).Render()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
