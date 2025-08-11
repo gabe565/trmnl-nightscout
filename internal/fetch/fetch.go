@@ -3,6 +3,7 @@ package fetch
 import (
 	"context"
 	"crypto/sha1" //nolint:gosec
+	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -27,10 +28,15 @@ var (
 )
 
 func NewFetch(conf *config.Config) *Fetch {
+	transport := http.DefaultTransport.(*http.Transport).Clone() //nolint:errcheck
+	transport.TLSClientConfig = &tls.Config{
+		InsecureSkipVerify: conf.NightscoutInsecureSkipTLSVerify, //nolint:gosec
+	}
+
 	f := &Fetch{
 		config: conf,
 		client: &http.Client{
-			Transport: util.NewUserAgentTransport("trmnl-nightscout", conf.Version),
+			Transport: util.NewUserAgentTransport(transport, "trmnl-nightscout", conf.Version),
 			Timeout:   time.Minute,
 		},
 	}

@@ -10,8 +10,10 @@ import (
 type Config struct {
 	Version string `toml:"-"`
 
-	// Nightscout base URL
+	// Nightscout base URL.
 	NightscoutURL string `env:"NIGHTSCOUT_URL,required"`
+	// Skip Nightscout certificate verification.
+	NightscoutInsecureSkipTLSVerify bool `env:"NIGHTSCOUT_INSECURE_SKIP_TLS_VERIFY"`
 
 	// A URL that the TRMNL device can use to download the image from this app. It can be a public URL or an internal IP address as long as the TRMNL device is on the same network.
 	ImageURL string `env:"IMAGE_URL,required"`

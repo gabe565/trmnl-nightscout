@@ -1,13 +1,14 @@
 package util
 
 import (
+	"net/http"
 	"runtime"
 	"strings"
 
 	"gabe565.com/utils/httpx"
 )
 
-func NewUserAgentTransport(name, version string) *httpx.UserAgentTransport {
+func NewUserAgentTransport(base *http.Transport, name, version string) *httpx.UserAgentTransport {
 	ua := name + "/"
 	commit := strings.TrimPrefix(GetCommit(), "*")
 	if version != "" {
@@ -20,5 +21,5 @@ func NewUserAgentTransport(name, version string) *httpx.UserAgentTransport {
 	}
 	ua += " (" + runtime.GOOS + "/" + runtime.GOARCH + ")"
 
-	return httpx.NewUserAgentTransport(nil, ua)
+	return httpx.NewUserAgentTransport(base, ua)
 }
