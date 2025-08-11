@@ -115,9 +115,23 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	u, err := url.Parse(s.conf.ImageURL)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	var u *url.URL
+	switch {
+	case s.conf.ImageURL != "":
+		if u, err = url.Parse(s.conf.ImageURL); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	case r.Host != "":
+		u = &url.URL{
+			Host:   r.Host,
+			Scheme: "http",
+		}
+		if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
+			u.Scheme = "https"
+		}
+	default:
+		http.Error(w, "Image URL unknown. Either set a request host or the IMAGE_URL env.", http.StatusBadRequest)
 		return
 	}
 

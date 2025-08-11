@@ -7,7 +7,9 @@ Config is the base configuration. Note that many of these envs can be overridden
  - `NIGHTSCOUT_URL` (**required**) - Nightscout base URL.
  - `NIGHTSCOUT_INSECURE_SKIP_TLS_VERIFY` - Skip Nightscout certificate verification.
  - `NIGHTSCOUT_CA_CERT_PATH` - Nightscout CA certificate file path.
- - `IMAGE_URL` (**required**) - A URL that the TRMNL device can use to download the image from this app. It can be a public URL or an internal IP address as long as the TRMNL device is on the same network.
+ - `IMAGE_URL` - A URL that the TRMNL device can use to download the image from this app.
+It can be a public URL or an internal IP address as long as the TRMNL device is on the same network.
+If not set, it will be inferred based on the request host.
  - `NIGHTSCOUT_TOKEN` - Nightscout token. Using an access token is recommended instead of the API secret.
  - `LISTEN_ADDRESS` (default: `:8080`) - HTTP server bind address.
  - `TLS_CERT_PATH` - TLS cert path for HTTPS listener.
