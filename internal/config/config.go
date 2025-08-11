@@ -28,7 +28,7 @@ type Config struct {
 	// Token required to access the API. If set, the value must be provided as a `token` query parameter.
 	AccessToken string `env:"ACCESS_TOKEN"`
 	// Get client IP address from the "Real-IP" header.
-	RealIPHeader bool `env:"REAL_IP_HEADER" envDefault:"false"`
+	RealIPHeader bool `env:"REAL_IP_HEADER"`
 
 	// The interval that new readings are sent to Nightscout.
 	UpdateInterval time.Duration `env:"UPDATE_INTERVAL"   envDefault:"5m"`

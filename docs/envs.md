@@ -11,7 +11,7 @@ Config is the base configuration. Note that many of these envs can be overridden
  - `NIGHTSCOUT_TOKEN` - Nightscout token. Using an access token is recommended instead of the API secret.
  - `LISTEN_ADDRESS` (default: `:8080`) - HTTP server bind address.
  - `ACCESS_TOKEN` - Token required to access the API. If set, the value must be provided as a `token` query parameter.
- - `REAL_IP_HEADER` (default: `false`) - Get client IP address from the "Real-IP" header.
+ - `REAL_IP_HEADER` - Get client IP address from the "Real-IP" header.
  - `UPDATE_INTERVAL` (default: `5m`) - The interval that new readings are sent to Nightscout.
  - `FETCH_DELAY` (default: `30s`) - Time to wait before the next reading should be ready. In testing, this seems to be about 20s behind, so the default is 30s to be safe. Your results may vary.
  - `FALLBACK_INTERVAL` (default: `30s`) - Normally, readings will be fetched when ready (after ~5m). This interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
