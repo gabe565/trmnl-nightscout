@@ -71,7 +71,12 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	group, ctx := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
-		slog.Info("Listening for connections", "address", s.conf.ListenAddress)
+		log := slog.With("address", s.conf.ListenAddress)
+		if s.conf.TLSCertPath != "" && s.conf.TLSKeyPath != "" {
+			log.Info("Listening for https connections")
+			return server.ListenAndServeTLS(s.conf.TLSCertPath, s.conf.TLSKeyPath)
+		}
+		log.Info("Listening for http connections")
 		return server.ListenAndServe()
 	})
 

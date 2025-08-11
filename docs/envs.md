@@ -10,6 +10,8 @@ Config is the base configuration. Note that many of these envs can be overridden
  - `IMAGE_URL` (**required**) - A URL that the TRMNL device can use to download the image from this app. It can be a public URL or an internal IP address as long as the TRMNL device is on the same network.
  - `NIGHTSCOUT_TOKEN` - Nightscout token. Using an access token is recommended instead of the API secret.
  - `LISTEN_ADDRESS` (default: `:8080`) - HTTP server bind address.
+ - `TLS_CERT_PATH` - TLS cert path for HTTPS listener.
+ - `TLS_KEY_PATH` - TLS key path for HTTPS listener.
  - `ACCESS_TOKEN` - Token required to access the API. If set, the value must be provided as a `token` query parameter.
  - `REAL_IP_HEADER` - Get client IP address from the "Real-IP" header.
  - `UPDATE_INTERVAL` (default: `5m`) - The interval that new readings are sent to Nightscout.

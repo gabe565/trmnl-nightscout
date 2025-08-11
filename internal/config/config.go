@@ -25,6 +25,10 @@ type Config struct {
 
 	// HTTP server bind address.
 	ListenAddress string `env:"LISTEN_ADDRESS" envDefault:":8080"`
+	// TLS cert path for HTTPS listener.
+	TLSCertPath string `env:"TLS_CERT_PATH"`
+	// TLS key path for HTTPS listener.
+	TLSKeyPath string `env:"TLS_KEY_PATH"`
 	// Token required to access the API. If set, the value must be provided as a `token` query parameter.
 	AccessToken string `env:"ACCESS_TOKEN"`
 	// Get client IP address from the "Real-IP" header.
