@@ -4,14 +4,17 @@ import (
 	"context"
 	"crypto/sha1" //nolint:gosec
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/hex"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"strconv"
 	"time"
@@ -27,10 +30,38 @@ var (
 	ErrNotModified = errors.New("not modified")
 )
 
-func NewFetch(conf *config.Config) *Fetch {
+func New(conf *config.Config) (*Fetch, error) {
+	var rootCAs *x509.CertPool
+	if conf.NightscoutCACertPath != "" {
+		rootCAs = x509.NewCertPool()
+
+		pemCerts, err := os.ReadFile(conf.NightscoutCACertPath)
+		if err != nil {
+			return nil, err
+		}
+
+		for len(pemCerts) != 0 {
+			var block *pem.Block
+			if block, pemCerts = pem.Decode(pemCerts); block == nil {
+				break
+			}
+			if block.Type != "CERTIFICATE" || len(block.Headers) != 0 {
+				continue
+			}
+
+			cert, err := x509.ParseCertificate(block.Bytes)
+			if err != nil {
+				return nil, err
+			}
+
+			rootCAs.AddCert(cert)
+		}
+	}
+
 	transport := http.DefaultTransport.(*http.Transport).Clone() //nolint:errcheck
 	transport.TLSClientConfig = &tls.Config{
 		InsecureSkipVerify: conf.NightscoutInsecureSkipTLSVerify, //nolint:gosec
+		RootCAs:            rootCAs,
 	}
 
 	f := &Fetch{
@@ -47,7 +78,7 @@ func NewFetch(conf *config.Config) *Fetch {
 		slog.Debug("Generated token checksum", "value", f.tokenChecksum)
 	}
 
-	return f
+	return f, nil
 }
 
 type Fetch struct {

@@ -14,6 +14,8 @@ type Config struct {
 	NightscoutURL string `env:"NIGHTSCOUT_URL,required"`
 	// Skip Nightscout certificate verification.
 	NightscoutInsecureSkipTLSVerify bool `env:"NIGHTSCOUT_INSECURE_SKIP_TLS_VERIFY"`
+	// Nightscout CA certificate file path.
+	NightscoutCACertPath string `env:"NIGHTSCOUT_CA_CERT_PATH"`
 
 	// A URL that the TRMNL device can use to download the image from this app. It can be a public URL or an internal IP address as long as the TRMNL device is on the same network.
 	ImageURL string `env:"IMAGE_URL,required"`

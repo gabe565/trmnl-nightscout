@@ -10,11 +10,16 @@ import (
 	"gabe565.com/trmnl-nightscout/internal/fetch"
 )
 
-func New(conf *config.Config) *Ticker {
+func New(conf *config.Config) (*Ticker, error) {
+	f, err := fetch.New(conf)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Ticker{
 		config: conf,
-		fetch:  fetch.NewFetch(conf),
-	}
+		fetch:  f,
+	}, nil
 }
 
 type Ticker struct {

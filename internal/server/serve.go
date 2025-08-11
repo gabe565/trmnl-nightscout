@@ -36,7 +36,12 @@ type Server struct {
 }
 
 func (s *Server) ListenAndServe(ctx context.Context) error {
-	s.ticker = ticker.New(s.conf).Start(ctx)
+	var err error
+	if s.ticker, err = ticker.New(s.conf); err != nil {
+		return err
+	}
+
+	s.ticker.Start(ctx)
 
 	r := chi.NewRouter()
 
@@ -80,7 +85,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		return server.Shutdown(ctx)
 	})
 
-	err := group.Wait()
+	err = group.Wait()
 	if errors.Is(err, context.Canceled) || errors.Is(err, http.ErrServerClosed) {
 		err = nil
 	}

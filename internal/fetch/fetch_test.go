@@ -95,7 +95,9 @@ func TestFetch_Do(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := NewFetch(tt.fields.config)
+			f, err := New(tt.fields.config)
+			require.NoError(t, err)
+
 			f.tokenChecksum = tt.fields.tokenChecksum
 			f.propertiesEtag = tt.fields.propertiesEtag
 
