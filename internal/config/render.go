@@ -40,7 +40,7 @@ type Render struct {
 	InvertAbove bg.BG `env:"INVERT_ABOVE" envDefault:"300"`
 
 	// Output color mode. 2-bit will be antialiased and dithering will be higher quality, but requires TRMNL firmware v1.6.0+. (one of 1bit, 2bit)
-	ColorMode ColorMode `env:"COLOR_MODE" envDefault:"1bit"`
+	ColorMode ColorMode `env:"COLOR_MODE" envDefault:"2bit"`
 }
 
 func (r *Render) UnmarshalQuery(q url.Values) error {

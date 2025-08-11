@@ -30,5 +30,5 @@ If not set, it will be inferred based on the request host.
  - `INVERT` - Render with a black background and a white foreground.
  - `INVERT_BELOW` (default: `55`) - Invert colors when below this value. (Stacks with the `INVERT` option)
  - `INVERT_ABOVE` (default: `300`) - Invert colors when above this value. (Stacks with the `INVERT` option)
- - `COLOR_MODE` (default: `1bit`) - Output color mode. 2-bit will be antialiased and dithering will be higher quality, but requires TRMNL firmware v1.6.0+. (one of 1bit, 2bit)
+ - `COLOR_MODE` (default: `2bit`) - Output color mode. 2-bit will be antialiased and dithering will be higher quality, but requires TRMNL firmware v1.6.0+. (one of 1bit, 2bit)
 

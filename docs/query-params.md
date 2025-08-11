@@ -14,4 +14,4 @@ The following GET parameters can be passed to the JSON or image endpoint. These 
 - `invert` - Render with a black background and a white foreground.
 - `invert_below` (default `55`) - Invert colors when below this value. (Stacks with the `INVERT` option)
 - `invert_above` (default `300`) - Invert colors when above this value. (Stacks with the `INVERT` option)
-- `color_mode` (default `1bit`) - Output color mode. 2-bit will be antialiased and dithering will be higher quality, but requires TRMNL firmware v1.6.0+. (one of 1bit, 2bit)
+- `color_mode` (default `2bit`) - Output color mode. 2-bit will be antialiased and dithering will be higher quality, but requires TRMNL firmware v1.6.0+. (one of 1bit, 2bit)
