@@ -18,7 +18,7 @@ func (t *Ticker) beginFetch(ctx context.Context) {
 			case <-ctx.Done():
 				return
 			case <-t.fetchTicker.C:
-				next := t.Fetch()
+				next := t.Fetch(ctx)
 				t.fetchTicker.Reset(next)
 				slog.Debug("Scheduled next fetch", "in", next)
 			}
@@ -26,8 +26,8 @@ func (t *Ticker) beginFetch(ctx context.Context) {
 	}()
 }
 
-func (t *Ticker) Fetch() time.Duration {
-	res, err := t.fetch.Do(context.Background())
+func (t *Ticker) Fetch(ctx context.Context) time.Duration {
+	res, err := t.fetch.Do(ctx)
 	if err != nil {
 		if !errors.Is(err, fetch.ErrNotModified) {
 			t.mu.Lock()
