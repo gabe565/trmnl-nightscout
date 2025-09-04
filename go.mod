@@ -10,7 +10,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/hhsnopek/etag v0.0.0-20171206181245-aea95f647346
 	github.com/makeworld-the-better-one/dither/v2 v2.4.0
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	golang.org/x/image v0.30.0
 	golang.org/x/sync v0.16.0
 	gonum.org/v1/plot v0.16.0
