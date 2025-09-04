@@ -127,6 +127,9 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 			Host:   r.Host,
 			Scheme: "http",
 		}
+		if v := r.Header.Get("X-Forwarded-For"); v != "" {
+			u.Host = v
+		}
 		if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
 			u.Scheme = "https"
 		}
