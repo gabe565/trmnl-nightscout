@@ -59,7 +59,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 	}
 
 	r.Get("/", s.json)
-	r.Get("/image.png", s.image)
+	r.Get("/{name}.png", s.image)
 
 	server := &http.Server{
 		Addr:           s.conf.ListenAddress,
@@ -138,14 +138,15 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u.Path = path.Join(u.Path, "image.png")
+	filename := "nightscout-" + stamp.Format("20060102150405") + ".png"
+	u.Path = path.Join(u.Path, filename)
 	u.RawQuery = r.URL.RawQuery
 
 	refreshRate := time.Until(last.Properties.Bgnow.Mills.Time) + s.conf.UpdateInterval + s.conf.FetchDelay
 	refreshRate = max(refreshRate, 60*time.Second)
 
 	b, err := json.Marshal(trmnl.Redirect{
-		Filename:    "nightscout-" + stamp.Format(time.RFC3339),
+		Filename:    filename,
 		URL:         u.String(),
 		RefreshRate: refreshRate,
 	})
