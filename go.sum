@@ -26,8 +26,8 @@ github.com/campoy/embedmd v1.0.0/go.mod h1:oxyr9RCiSXg0M3VJ3ks0UGfp98BpSSGr0kpiX
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dmarkham/enumer v1.6.0 h1:1Mo0+iUV+kFWSHyVtxONaPrDs2TXiRC3ryQQ+XgzvX0=
-github.com/dmarkham/enumer v1.6.0/go.mod h1:yixql+kDDQRYqcuBM2n9Vlt7NoT9ixgXhaXry8vmRg8=
+github.com/dmarkham/enumer v1.6.1 h1:aSc9awYtZL07TUueWs40QcHtxTvHTAwG0EqrNsK45w4=
+github.com/dmarkham/enumer v1.6.1/go.mod h1:yixql+kDDQRYqcuBM2n9Vlt7NoT9ixgXhaXry8vmRg8=
 github.com/g4s8/envdoc v1.6.0 h1:wKDq3KULAxPy/4ufRy1BYz5iFsLyaEaSVeP0kYfAKJY=
 github.com/g4s8/envdoc v1.6.0/go.mod h1:pj9RrhlVsEttLskIMMF4gs8alTUkCsf6N/JzGwKYA/k=
 github.com/go-chi/chi/v5 v5.2.2 h1:CMwsvRVTbXVytCk1Wd72Zy1LAsAh9GxMmSNWLHCG618=
