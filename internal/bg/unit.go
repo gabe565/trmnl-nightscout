@@ -3,7 +3,7 @@ package bg
 
 import "bytes"
 
-const MmolConversionFactor = 0.0555
+const MmolConversionFactor = 18
 
 //go:generate go tool enumer -type Unit -linecomment
 

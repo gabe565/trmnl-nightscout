@@ -1,11 +1,11 @@
 package bg
 
 func MgdlToMmol(v float64) float64 {
-	return v * MmolConversionFactor
+	return v / MmolConversionFactor
 }
 
 func MmolToMgdl(v float64) float64 {
-	return v / MmolConversionFactor
+	return v * MmolConversionFactor
 }
 
 func NewMgdl[T float64 | BG | int](v T) BG {
