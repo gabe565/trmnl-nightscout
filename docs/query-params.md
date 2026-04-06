@@ -8,6 +8,7 @@ The following GET parameters can be passed to the JSON or image endpoint. These 
 - `graph_duration` (default `6h`) - How far back in time the graph should go.
 - `graph_min` (default `40`) - Minimum X-axis value.
 - `graph_max` (default `300`) - Maximum X-axis value.
+- `expand_graph_max` (default `true`) - Expand the graph if readings are above the max.
 - `point_stroke_radius` (default `4`) - Control the plot point stroke radius. Set to 0 to disable.
 - `high_threshold` (default `200`) - Where to draw the upper line.
 - `low_threshold` (default `70`) - Where to draw the lower line.

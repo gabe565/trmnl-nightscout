@@ -23,6 +23,8 @@ type Render struct {
 	GraphMin bg.BG `env:"GRAPH_MIN" envDefault:"40"`
 	// Maximum X-axis value.
 	GraphMax bg.BG `env:"GRAPH_MAX" envDefault:"300"`
+	// Expand the graph if readings are above the max.
+	ExpandGraphMax bool `env:"EXPAND_GRAPH_MAX" envDefault:"true"`
 
 	// Control the plot point stroke radius. Set to 0 to disable.
 	PointStrokeRadius vg.Length `env:"POINT_STROKE_RADIUS" envDefault:"4"`

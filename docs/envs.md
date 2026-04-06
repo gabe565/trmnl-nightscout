@@ -25,6 +25,7 @@ If not set, it will be inferred based on the request host.
    - `GRAPH_DURATION` (default: `6h`) - How far back in time the graph should go.
    - `GRAPH_MIN` (default: `40`) - Minimum X-axis value.
    - `GRAPH_MAX` (default: `300`) - Maximum X-axis value.
+   - `EXPAND_GRAPH_MAX` (default: `true`) - Expand the graph if readings are above the max.
    - `POINT_STROKE_RADIUS` (default: `4`) - Control the plot point stroke radius. Set to 0 to disable.
    - `HIGH_THRESHOLD` (default: `200`) - Where to draw the upper line.
    - `LOW_THRESHOLD` (default: `70`) - Where to draw the lower line.

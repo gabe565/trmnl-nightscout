@@ -171,8 +171,22 @@ func (r *Renderer) drawPlot() {
 	p := plot.New()
 	p.BackgroundColor = color.Transparent
 
+	end := time.Now()
+	start := end.Add(-r.conf.GraphDuration)
+
 	p.Y.Min = r.conf.GraphMin.Value(r.conf.Unit)
 	p.Y.Max = r.conf.GraphMax.Value(r.conf.Unit)
+
+	if r.conf.ExpandGraphMax {
+		for _, entry := range r.res.Entries {
+			if entry.Date.Before(start) || entry.Date.After(end) {
+				continue
+			}
+			reading := entry.SGV.Value(r.conf.Unit)
+			p.Y.Max = max(p.Y.Max, reading)
+		}
+	}
+
 	p.Y.Padding = 0
 	p.Y.Tick.Label.Font.Size = 10
 	if r.conf.Unit == bg.Mmol {
@@ -189,8 +203,6 @@ func (r *Renderer) drawPlot() {
 		p.Y.Tick.Marker = ticks
 	}
 
-	end := time.Now()
-	start := end.Add(-r.conf.GraphDuration)
 	p.X.Min = float64(start.Unix())
 	p.X.Max = float64(end.Unix())
 	p.X.Padding = 0
