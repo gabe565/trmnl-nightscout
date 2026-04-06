@@ -191,9 +191,9 @@ func (r *Renderer) drawPlot() {
 	p.Y.Tick.Label.Font.Size = 10
 	if r.conf.Unit == bg.Mmol {
 		ticks := make(plot.ConstantTicks, 0,
-			int(r.conf.GraphMax.Value(r.conf.Unit))-int(r.conf.GraphMin.Value(r.conf.Unit))+1,
+			int(p.Y.Max)-int(p.Y.Min)+1,
 		)
-		for i := int(r.conf.GraphMin.Value(r.conf.Unit)); i <= int(r.conf.GraphMax.Value(r.conf.Unit)); i++ {
+		for i := int(p.Y.Min); i <= int(p.Y.Max); i++ {
 			tick := plot.Tick{Value: float64(i)}
 			if i%2 == 0 {
 				tick.Label = strconv.Itoa(i)
@@ -279,8 +279,7 @@ func (r *Renderer) drawPlot() {
 			continue
 		}
 		reading := entry.SGV.Value(r.conf.Unit)
-		reading = min(reading, r.conf.GraphMax.Value(r.conf.Unit))
-		reading = max(reading, r.conf.GraphMin.Value(r.conf.Unit))
+		reading = max(p.Y.Min, min(reading, p.Y.Max))
 		pointsXY = append(pointsXY, plotter.XY{
 			X: float64(entry.Date.Unix()),
 			Y: reading,
