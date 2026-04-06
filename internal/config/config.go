@@ -37,11 +37,12 @@ type Config struct {
 	RealIPHeader bool `env:"REAL_IP_HEADER"`
 
 	// The interval that new readings are sent to Nightscout.
-	UpdateInterval time.Duration `env:"UPDATE_INTERVAL"   envDefault:"5m"`
+	UpdateInterval time.Duration `env:"UPDATE_INTERVAL" envDefault:"5m"`
 	// Time to wait before the next reading should be ready. In testing, this seems to be about 20s behind, so the default is 30s to be safe. Your results may vary.
-	FetchDelay time.Duration `env:"FETCH_DELAY"       envDefault:"30s"`
+	FetchDelay time.Duration `env:"FETCH_DELAY" envDefault:"30s"`
 	// Normally, readings will be fetched when ready (after ~5m). This interval will be used if the next reading time cannot be estimated due to sensor warm-up, missed readings, errors, etc.
 	FallbackInterval time.Duration `env:"FALLBACK_INTERVAL" envDefault:"30s"`
 
+	// Default render configuration
 	Render Render
 }

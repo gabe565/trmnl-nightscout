@@ -20,9 +20,9 @@ type Render struct {
 	// How far back in time the graph should go.
 	GraphDuration time.Duration `env:"GRAPH_DURATION" envDefault:"6h"`
 	// Minimum X-axis value.
-	GraphMin bg.BG `env:"GRAPH_MIN"      envDefault:"40"`
+	GraphMin bg.BG `env:"GRAPH_MIN" envDefault:"40"`
 	// Maximum X-axis value.
-	GraphMax bg.BG `env:"GRAPH_MAX"      envDefault:"300"`
+	GraphMax bg.BG `env:"GRAPH_MAX" envDefault:"300"`
 
 	// Control the plot point stroke radius. Set to 0 to disable.
 	PointStrokeRadius vg.Length `env:"POINT_STROKE_RADIUS" envDefault:"4"`
@@ -30,7 +30,7 @@ type Render struct {
 	// Where to draw the upper line.
 	HighThreshold bg.BG `env:"HIGH_THRESHOLD" envDefault:"200"`
 	// Where to draw the lower line.
-	LowThreshold bg.BG `env:"LOW_THRESHOLD"  envDefault:"70"`
+	LowThreshold bg.BG `env:"LOW_THRESHOLD" envDefault:"70"`
 
 	// Render with a black background and a white foreground.
 	Invert bool `env:"INVERT"`
