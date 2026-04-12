@@ -23,16 +23,12 @@ import (
 )
 
 func New(conf *config.Config) *Server {
-	return &Server{
-		conf:    conf,
-		started: time.Now(),
-	}
+	return &Server{conf: conf}
 }
 
 type Server struct {
-	conf    *config.Config
-	ticker  *ticker.Ticker
-	started time.Time
+	conf   *config.Config
+	ticker *ticker.Ticker
 }
 
 func (s *Server) ListenAndServe(ctx context.Context) error {
@@ -105,14 +101,10 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 	}
 
 	stamp := last.Properties.Bgnow.Mills.Time
-	if stamp.Before(s.started) {
-		stamp = s.started
-	} else {
-		age := time.Since(stamp)
-		if age > s.conf.UpdateInterval+s.conf.FetchDelay {
-			missed := int(age / s.conf.UpdateInterval)
-			stamp = stamp.Add(time.Duration(missed) * s.conf.UpdateInterval)
-		}
+	age := time.Since(stamp)
+	if age > s.conf.UpdateInterval+s.conf.FetchDelay {
+		missed := int(age / s.conf.UpdateInterval)
+		stamp = stamp.Add(time.Duration(missed) * s.conf.UpdateInterval)
 	}
 
 	var u *url.URL
@@ -142,8 +134,8 @@ func (s *Server) json(w http.ResponseWriter, r *http.Request) {
 	u.Path = path.Join(u.Path, filename)
 	u.RawQuery = r.URL.RawQuery
 
-	refreshRate := time.Until(last.Properties.Bgnow.Mills.Time) + s.conf.UpdateInterval + s.conf.FetchDelay
-	refreshRate = max(refreshRate, 60*time.Second)
+	nextExpected := stamp.Add(s.conf.UpdateInterval + s.conf.FetchDelay)
+	refreshRate := max(time.Until(nextExpected), time.Minute)
 
 	b, err := json.Marshal(trmnl.Redirect{
 		Filename:    filename,
