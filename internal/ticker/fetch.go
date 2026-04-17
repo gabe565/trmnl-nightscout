@@ -11,16 +11,18 @@ import (
 
 func (t *Ticker) beginFetch(ctx context.Context) {
 	go func() {
-		t.fetchTicker = time.NewTicker(time.Millisecond)
+		t.fetchTicker = time.NewTicker(t.config.FallbackInterval)
 		defer t.fetchTicker.Stop()
+
 		for {
+			next := t.Fetch(ctx)
+			t.fetchTicker.Reset(next)
+			slog.Debug("Scheduled next fetch", "in", next)
+
 			select {
 			case <-ctx.Done():
 				return
 			case <-t.fetchTicker.C:
-				next := t.Fetch(ctx)
-				t.fetchTicker.Reset(next)
-				slog.Debug("Scheduled next fetch", "in", next)
 			}
 		}
 	}()
