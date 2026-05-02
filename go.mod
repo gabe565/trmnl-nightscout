@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	gabe565.com/utils v0.0.0-20260310002041-b3b94f17b36b
-	github.com/caarlos0/env/v11 v11.4.0
+	github.com/caarlos0/env/v11 v11.4.1
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/go-chi/httprate v0.15.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
