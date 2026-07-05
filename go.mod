@@ -6,7 +6,7 @@ require (
 	gabe565.com/utils v0.0.0-20260310002041-b3b94f17b36b
 	github.com/caarlos0/env/v11 v11.4.0
 	github.com/go-chi/chi/v5 v5.2.5
-	github.com/go-chi/httprate v0.15.0
+	github.com/go-chi/httprate v0.16.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/hhsnopek/etag v0.0.0-20171206181245-aea95f647346
 	github.com/makeworld-the-better-one/dither/v2 v2.4.0
